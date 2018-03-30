@@ -22,7 +22,7 @@
     </licenses>
 
     <modules>
-        <module>GcsMaven</module>
+        <module>GcsWagon</module>
         <module>CloudStorageCore</module>
     </modules>
 
