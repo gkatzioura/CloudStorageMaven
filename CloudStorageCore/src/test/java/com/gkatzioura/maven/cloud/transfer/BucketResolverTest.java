@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.gcs;
+package com.gkatzioura.maven.cloud.transfer;
 
 import org.apache.maven.wagon.repository.Repository;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class BaseDirectoryResolver {
+import com.gkatzioura.maven.cloud.resolver.BucketResolver;
 
-    public String resolve(Repository repository) {
+public class BucketResolverTest {
 
-        StringBuilder stringBuilder = new StringBuilder(repository.getBasedir()).deleteCharAt(0);
+    @Test
+    public void testResolve() {
 
-        if ((stringBuilder.length() != 0) && (stringBuilder.charAt(stringBuilder.length() - 1) != '/')) {
-            stringBuilder.append('/');
-        }
-
-        return stringBuilder.toString();
+        BucketResolver bucketResolver = new BucketResolver();
+        Repository repository = new Repository("test-repo","gs://test-repo/release");
+        String bucketName = bucketResolver.resolve(repository);
+        Assert.assertEquals("test-repo",bucketName);
     }
+
 }

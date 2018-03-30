@@ -40,6 +40,8 @@ import com.gkatzioura.maven.cloud.listener.SessionListenerContainer;
 import com.gkatzioura.maven.cloud.listener.SessionListenerContainerImpl;
 import com.gkatzioura.maven.cloud.listener.TransferListenerContainer;
 import com.gkatzioura.maven.cloud.listener.TransferListenerContainerImpl;
+import com.gkatzioura.maven.cloud.resolver.BaseDirectoryResolver;
+import com.gkatzioura.maven.cloud.resolver.BucketResolver;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
 
@@ -53,8 +55,8 @@ public class AzureStorageWagon implements Wagon {
     private Repository repository = null;
     private AzureStorageRepository azureStorageRepository;
 
-    private final AccountResolver accountResolver;
-    private final ContainerResolver containerResolver;
+    private final BucketResolver accountResolver;
+    private final BaseDirectoryResolver containerResolver;
 
     private final SessionListenerContainer sessionListenerContainer;
     private final TransferListenerContainer transferListenerContainer;
@@ -64,8 +66,8 @@ public class AzureStorageWagon implements Wagon {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageWagon.class);
 
     public AzureStorageWagon() {
-        this.accountResolver = new AccountResolver();
-        this.containerResolver = new ContainerResolver();
+        this.accountResolver = new BucketResolver();
+        this.containerResolver = new BaseDirectoryResolver();
         this.sessionListenerContainer = new SessionListenerContainerImpl(this);
         this.transferListenerContainer = new TransferListenerContainerImpl(this);
     }

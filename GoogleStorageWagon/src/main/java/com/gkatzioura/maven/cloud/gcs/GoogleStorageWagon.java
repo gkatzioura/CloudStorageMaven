@@ -43,6 +43,8 @@ import com.gkatzioura.maven.cloud.listener.SessionListenerContainer;
 import com.gkatzioura.maven.cloud.listener.SessionListenerContainerImpl;
 import com.gkatzioura.maven.cloud.listener.TransferListenerContainer;
 import com.gkatzioura.maven.cloud.listener.TransferListenerContainerImpl;
+import com.gkatzioura.maven.cloud.resolver.BaseDirectoryResolver;
+import com.gkatzioura.maven.cloud.resolver.BucketResolver;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;

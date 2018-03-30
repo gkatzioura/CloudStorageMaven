@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.abs;
+package com.gkatzioura.maven.cloud.resolver;
 
 import org.apache.maven.wagon.repository.Repository;
 
-public class AccountResolver {
+public class BucketResolver {
 
-    public String resolve(Repository repository) {
+    public String resolve(Repository repository){
 
-        StringBuilder stringBuilder = new StringBuilder(repository.getBasedir()).deleteCharAt(0);
-
-        if ((stringBuilder.length() != 0) && (stringBuilder.charAt(stringBuilder.length() - 1) != '/')) {
-            stringBuilder.append('/');
-        }
-
-        return stringBuilder.toString();
+        return repository.getHost();
     }
 
 }
