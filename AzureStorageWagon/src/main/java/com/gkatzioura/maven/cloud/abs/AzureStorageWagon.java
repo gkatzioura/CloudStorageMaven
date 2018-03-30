@@ -88,13 +88,21 @@ public class AzureStorageWagon implements Wagon {
     }
 
     @Override
-    public boolean getIfNewer(String s, File file, long l) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        if(azureStorageRepository.newResourceAvailable(s, l)) {
-            get(s,file);
-            return true;
-        }
+    public boolean getIfNewer(String resourceName, File file, long l) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
 
-        return false;
+        Resource resource = new Resource(resourceName);
+
+        try {
+            if(azureStorageRepository.newResourceAvailable(resourceName, l)) {
+                get(resourceName,file);
+                return true;
+            }
+
+            return false;
+        } catch (TransferFailedException| ResourceDoesNotExistException| AuthorizationException e) {
+            this.transferListenerContainer.fireTransferError(resource, TransferEvent.REQUEST_GET, e);
+            throw e;
+        }
     }
 
     @Override
@@ -114,7 +122,7 @@ public class AzureStorageWagon implements Wagon {
             transferListenerContainer.fireTransferCompleted(resource, TransferEvent.REQUEST_PUT);
         } catch (TransferFailedException e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_PUT,e);
-            throw new TransferFailedException("Faild to transfer artifact",e);
+            throw e;
         }
     }
 
@@ -129,13 +137,24 @@ public class AzureStorageWagon implements Wagon {
     }
 
     @Override
-    public boolean resourceExists(String s) throws TransferFailedException, AuthorizationException {
-        return azureStorageRepository.exists(s);
+    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
+        try {
+            return azureStorageRepository.exists(resourceName);
+        } catch (TransferFailedException e) {
+            transferListenerContainer.fireTransferError(new Resource(resourceName), TransferEvent.REQUEST_GET, e);
+            throw e;
+        }
     }
 
     @Override
-    public List<String> getFileList(String s) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        return azureStorageRepository.list(s);
+    public List<String> getFileList(String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+
+        try {
+            return azureStorageRepository.list(resourceName);
+        } catch (Exception e) {
+            transferListenerContainer.fireTransferError(new Resource(resourceName),TransferEvent.REQUEST_GET, e);
+            throw new TransferFailedException("Could not fetch resource");
+        }
     }
 
     @Override
@@ -203,8 +222,10 @@ public class AzureStorageWagon implements Wagon {
 
     @Override
     public void disconnect() throws ConnectionException {
-
+        sessionListenerContainer.fireSessionDisconnecting();
         azureStorageRepository.disconnect();
+        sessionListenerContainer.fireSessionLoggedOff();
+        sessionListenerContainer.fireSessionDisconnected();
     }
 
     @Override
