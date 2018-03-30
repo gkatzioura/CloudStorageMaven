@@ -79,16 +79,15 @@ public class AzureStorageWagon implements Wagon {
         transferListenerContainer.fireTransferInitiated(resource, TransferEvent.REQUEST_GET);
         transferListenerContainer.fireTransferStarted(resource, TransferEvent.REQUEST_GET);
 
-        try {
+        final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_GET, transferListenerContainer);
 
-            TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_GET, transferListenerContainer);
+        try {
             azureStorageRepository.copy(resourceName,destination,transferProgress);
             transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_GET);
         } catch (Exception e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_GET,e);
             throw e;
         }
-
     }
 
     @Override
@@ -119,10 +118,10 @@ public class AzureStorageWagon implements Wagon {
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
 
-        TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
+        final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
 
         try {
-            azureStorageRepository.put(file, resourceName);
+            azureStorageRepository.put(file, resourceName,transferProgress);
             transferListenerContainer.fireTransferCompleted(resource, TransferEvent.REQUEST_PUT);
         } catch (TransferFailedException e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_PUT,e);

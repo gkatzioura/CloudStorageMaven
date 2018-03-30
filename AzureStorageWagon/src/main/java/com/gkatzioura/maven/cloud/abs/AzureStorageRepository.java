@@ -18,6 +18,7 @@ package com.gkatzioura.maven.cloud.abs;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
+import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileOutputStream;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -83,8 +85,9 @@ public class AzureStorageRepository {
                 throw new ResourceDoesNotExistException(resourceName);
             }
 
-            try(OutputStream outputStream = new TransferProgressFileOutputStream(destination, transferProgress)) {
-                IOUtils.copy(cloudBlob.openInputStream(),outputStream);
+            try(OutputStream outputStream = new TransferProgressFileOutputStream(destination, transferProgress);
+                InputStream inputStream = cloudBlob.openInputStream()) {
+                IOUtils.copy(inputStream,outputStream);
             }
         } catch (URISyntaxException |StorageException |IOException e) {
             throw new ResourceDoesNotExistException("Could not download file from repo",e);
@@ -109,13 +112,17 @@ public class AzureStorageRepository {
         }
     }
 
-    public boolean put(File file, String destination) throws TransferFailedException {
+    public boolean put(File file, String destination,TransferProgress transferProgress) throws TransferFailedException {
 
         LOGGER.debug("Uploading key {} ",destination);
 
         try {
+
             CloudBlockBlob blob = blobContainer.getBlockBlobReference(destination);
-            blob.uploadFromFile(file.getAbsolutePath());
+
+            try(InputStream inputStream = new TransferProgressFileInputStream(file,transferProgress)) {
+                blob.upload(inputStream,-1);
+            }
         } catch (URISyntaxException |StorageException | IOException e) {
             LOGGER.error("Could not fetch cloud blob",e);
             throw new TransferFailedException(destination);
