@@ -13,12 +13,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <component-set>
     <components>
         <component>
             <role>org.apache.maven.wagon.Wagon</role>
-            <role-hint>gs</role-hint>
-            <implementation>com.gkatzioura.maven.cloud.gcs.GoogleStorageWagon</implementation>
+            <role-hint>bs</role-hint>
+            <implementation>com.gkatzioura.maven.cloud.abs.AzureStorageWagon</implementation>
             <instantiation-strategy>per-lookup</instantiation-strategy>
         </component>
     </components>

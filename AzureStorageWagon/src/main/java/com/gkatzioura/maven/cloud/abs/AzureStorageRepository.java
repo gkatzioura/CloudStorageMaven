@@ -73,14 +73,14 @@ public class AzureStorageRepository {
         try {
             CloudBlob cloudBlob = blobContainer.getBlobReferenceFromServer(resourceName);
 
-            if(cloudBlob.exists()) {
+            if(!cloudBlob.exists()) {
                 LOGGER.debug("Blob {} does not exist",resourceName);
                 throw new ResourceDoesNotExistException(resourceName);
             }
 
             cloudBlob.downloadToFile(destination.getAbsolutePath());
         } catch (URISyntaxException |StorageException |IOException e) {
-            throw new RuntimeException("Could not download file from repo",e);
+            throw new ResourceDoesNotExistException("Could not download file from repo",e);
         }
     }
 
