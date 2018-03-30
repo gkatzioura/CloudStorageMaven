@@ -51,7 +51,7 @@ public class GcsRepository {
 
         final String key = resolveKey(resourceName);
 
-        LOGGER.debug("Downloading key {} from bucket {} into {}",key,bucket ,destination.getName());
+        LOGGER.debug("Downloading key {} from bucket {} into {}",key,bucket ,destination.getAbsolutePath());
 
         Blob blob = storage.get(bucket, resolveKey(resourceName));
 

@@ -106,7 +106,7 @@ public class GcsWagon implements Wagon {
 
         Resource resource = new Resource(resourceName);
 
-        LOGGER.debug("Uploading file {} to {}",file.getName(),resourceName);
+        LOGGER.debug("Uploading file {} to {}",file.getAbsolutePath(),resourceName);
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
