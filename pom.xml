@@ -8,6 +8,19 @@
     <artifactId>cloud-storage</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
+
+    <name>Cloud Storage</name>
+    <description>The CloudStorage project enables you to use the storage options of cloud provides (Google Cloud) storage as maven repositories.</description>
+    <url>https://github.com/gkatzioura/CloudStorage</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <modules>
         <module>GcsMaven</module>
         <module>CloudStorageCore</module>
