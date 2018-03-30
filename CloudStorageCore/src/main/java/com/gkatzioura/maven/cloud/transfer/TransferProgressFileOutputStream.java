@@ -21,11 +21,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-final class TransferProgressFileOutputStream extends FileOutputStream {
+public final class TransferProgressFileOutputStream extends FileOutputStream {
 
     private final TransferProgress transferProgress;
 
-    TransferProgressFileOutputStream(File file, TransferProgress transferProgress) throws FileNotFoundException {
+    public TransferProgressFileOutputStream(File file, TransferProgress transferProgress) throws FileNotFoundException {
         super(file);
         this.transferProgress = transferProgress;
     }

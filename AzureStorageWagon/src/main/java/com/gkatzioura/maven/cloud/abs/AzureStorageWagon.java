@@ -80,7 +80,9 @@ public class AzureStorageWagon implements Wagon {
         transferListenerContainer.fireTransferStarted(resource, TransferEvent.REQUEST_GET);
 
         try {
-            azureStorageRepository.copy(resourceName,destination);
+
+            TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_GET, transferListenerContainer);
+            azureStorageRepository.copy(resourceName,destination,transferProgress);
             transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_GET);
         } catch (Exception e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_GET,e);

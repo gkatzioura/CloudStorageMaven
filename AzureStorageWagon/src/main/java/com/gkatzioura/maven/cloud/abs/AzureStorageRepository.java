@@ -18,12 +18,14 @@ package com.gkatzioura.maven.cloud.abs;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -31,6 +33,8 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gkatzioura.maven.cloud.transfer.TransferProgress;
+import com.gkatzioura.maven.cloud.transfer.TransferProgressFileOutputStream;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;
@@ -66,11 +70,12 @@ public class AzureStorageRepository {
         }
     }
 
-    public void copy(String resourceName, File destination) throws ResourceDoesNotExistException {
+    public void copy(String resourceName, File destination, TransferProgress transferProgress) throws ResourceDoesNotExistException {
 
         LOGGER.debug("Downloading key {} from container {} into {}",resourceName,container,destination.getAbsolutePath());
 
         try {
+
             CloudBlob cloudBlob = blobContainer.getBlobReferenceFromServer(resourceName);
 
             if(!cloudBlob.exists()) {
@@ -78,7 +83,9 @@ public class AzureStorageRepository {
                 throw new ResourceDoesNotExistException(resourceName);
             }
 
-            cloudBlob.downloadToFile(destination.getAbsolutePath());
+            try(OutputStream outputStream = new TransferProgressFileOutputStream(destination, transferProgress)) {
+                IOUtils.copy(cloudBlob.openInputStream(),outputStream);
+            }
         } catch (URISyntaxException |StorageException |IOException e) {
             throw new ResourceDoesNotExistException("Could not download file from repo",e);
         }
