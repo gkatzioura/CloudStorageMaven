@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.gcs;
+package com.gkatzioura.maven.cloud.abs;
 
 import org.apache.maven.wagon.repository.Repository;
 
-public class BaseDirectoryResolver {
+public class AccountResolver {
 
     public String resolve(Repository repository) {
 
@@ -31,13 +31,4 @@ public class BaseDirectoryResolver {
         return stringBuilder.toString();
     }
 
-    public String concat(String... paths) {
-
-        StringBuilder builder = new StringBuilder();
-        for(String s : paths) {
-            builder.append(s);
-        }
-
-        return builder.toString();
-    }
 }

@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.gcs;
+package com.gkatzioura.maven.cloud.abs;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import org.apache.maven.wagon.ConnectionException;
@@ -44,10 +41,9 @@ import com.gkatzioura.maven.cloud.listener.SessionListenerContainerImpl;
 import com.gkatzioura.maven.cloud.listener.TransferListenerContainer;
 import com.gkatzioura.maven.cloud.listener.TransferListenerContainerImpl;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
-import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
 
-public class GcsWagon implements Wagon {
+public class AzureStorageWagon implements Wagon {
 
     private static final boolean SUPPORTS_DIRECTORY_COPY = true;
 
@@ -55,22 +51,21 @@ public class GcsWagon implements Wagon {
     private int readConnectionTimeOut = 0;
 
     private Repository repository = null;
-    private GcsRepository gcsRepository;
+    private AzureStorageRepository azureStorageRepository;
 
-    private final BucketResolver bucketResolver;
-    private final BaseDirectoryResolver directoryResolver;
-    private final KeyResolver keyResolver;
+    private final AccountResolver accountResolver;
+    private final ContainerResolver containerResolver;
+
     private final SessionListenerContainer sessionListenerContainer;
     private final TransferListenerContainer transferListenerContainer;
 
     private boolean interactive;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcsWagon.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageWagon.class);
 
-    public GcsWagon() {
-        this.bucketResolver = new BucketResolver();
-        this.directoryResolver = new BaseDirectoryResolver();
-        this.keyResolver = new KeyResolver();
+    public AzureStorageWagon() {
+        this.accountResolver = new AccountResolver();
+        this.containerResolver = new ContainerResolver();
         this.sessionListenerContainer = new SessionListenerContainerImpl(this);
         this.transferListenerContainer = new TransferListenerContainerImpl(this);
     }
@@ -83,17 +78,18 @@ public class GcsWagon implements Wagon {
         transferListenerContainer.fireTransferStarted(resource, TransferEvent.REQUEST_GET);
 
         try {
-            gcsRepository.copy(resourceName,destination);
+            azureStorageRepository.copy(resourceName,destination);
             transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_GET);
         } catch (Exception e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_GET,e);
             throw e;
         }
+
     }
 
     @Override
     public boolean getIfNewer(String s, File file, long l) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        if(gcsRepository.newResourceAvailable(s,l)) {
+        if(azureStorageRepository.newResourceAvailable(s, l)) {
             get(s,file);
             return true;
         }
@@ -110,16 +106,14 @@ public class GcsWagon implements Wagon {
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
+
         TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
 
-        try(InputStream inputStream = new TransferProgressFileInputStream(file, transferProgress)) {
-            gcsRepository.put(inputStream,resourceName);
-            transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_PUT);
-        } catch (FileNotFoundException e) {
-            transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_PUT);
-            throw new ResourceDoesNotExistException("Faild to transfer artifact",e);
-        } catch (IOException e) {
-            transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_PUT);
+        try {
+            azureStorageRepository.put(file, resourceName);
+            transferListenerContainer.fireTransferCompleted(resource, TransferEvent.REQUEST_PUT);
+        } catch (TransferFailedException e) {
+            transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_PUT,e);
             throw new TransferFailedException("Faild to transfer artifact",e);
         }
     }
@@ -135,15 +129,13 @@ public class GcsWagon implements Wagon {
     }
 
     @Override
-    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
-
-        return gcsRepository.exists(resourceName);
+    public boolean resourceExists(String s) throws TransferFailedException, AuthorizationException {
+        return azureStorageRepository.exists(s);
     }
 
     @Override
     public List<String> getFileList(String s) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-
-        return gcsRepository.list(s);
+        return azureStorageRepository.list(s);
     }
 
     @Override
@@ -163,13 +155,11 @@ public class GcsWagon implements Wagon {
 
     @Override
     public void connect(Repository repository, ProxyInfo proxyInfo) throws ConnectionException, AuthenticationException {
-
         connect(repository,null,proxyInfo);
     }
 
     @Override
     public void connect(Repository repository, ProxyInfoProvider proxyInfoProvider) throws ConnectionException, AuthenticationException {
-
         connect(repository, null, proxyInfoProvider);
     }
 
@@ -183,20 +173,21 @@ public class GcsWagon implements Wagon {
         connect(repository, authenticationInfo, p->{if((p == null) || (proxyInfo == null) || p.equalsIgnoreCase(proxyInfo.getType())) return proxyInfo;  else return null;});
     }
 
-
     @Override
-    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) {
+    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) throws ConnectionException, AuthenticationException {
+
         this.repository = repository;
-
         this.sessionListenerContainer.fireSessionOpening();
+
         try {
-            final String bucket = bucketResolver.resolve(repository);
-            final String directory = directoryResolver.resolve(repository);
 
-            LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
+            final String account = accountResolver.resolve(repository);
+            final String container = containerResolver.resolve(repository);
 
-            gcsRepository = new GcsRepository(bucket, directory);
-            gcsRepository.connect(repository);
+            LOGGER.debug("Opening connection for account {} and container {}",account,container);
+
+            azureStorageRepository = new AzureStorageRepository(account,container);
+            azureStorageRepository.connect(authenticationInfo);
             sessionListenerContainer.fireSessionLoggedIn();
             sessionListenerContainer.fireSessionOpened();
         } catch (Exception e) {
@@ -206,15 +197,14 @@ public class GcsWagon implements Wagon {
     }
 
     @Override
-    @Deprecated
     public void openConnection() throws ConnectionException, AuthenticationException {
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void disconnect() throws ConnectionException {
-        gcsRepository.disconnect();
+
+        azureStorageRepository.disconnect();
     }
 
     @Override
@@ -229,7 +219,7 @@ public class GcsWagon implements Wagon {
 
     @Override
     public void setReadTimeout(int i) {
-        this.readConnectionTimeOut = i;
+        readConnectionTimeOut = i;
     }
 
     @Override

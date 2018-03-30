@@ -32,19 +32,24 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-public class GcsRepository {
+public class GoogleStorageRepository {
 
     private final String bucket;
     private final String baseDirectory;
     private final KeyResolver keyResolver;
     private Storage storage;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcsRepository.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleStorageRepository.class);
 
-    public GcsRepository(String bucket, String directory) {
+    public GoogleStorageRepository(String bucket, String directory) {
         this.keyResolver = new KeyResolver();
         this.bucket = bucket;
         this.baseDirectory = directory;
+    }
+
+    public void connect(Repository repository) {
+
+        storage = StorageOptions.getDefaultInstance().getService();
     }
 
     public void copy(String resourceName, File destination) throws ResourceDoesNotExistException {
@@ -66,9 +71,14 @@ public class GcsRepository {
 
         final String key = resolveKey(resourceName);
 
-        LOGGER.debug("Checking if new key {} exists",key,bucket ,key);
+        LOGGER.debug("Checking if new key {} exists",key);
 
         Blob blob = storage.get(bucket, key);
+
+        if(blob==null) {
+            return false;
+        }
+
         long updated = blob.getUpdateTime();
         return updated>timeStamp;
     }
@@ -112,12 +122,6 @@ public class GcsRepository {
         final String key = resolveKey(resourceName);
         Blob blob = storage.get(bucket, resourceName);
         return blob.exists();
-    }
-
-    public Storage connect(Repository repository) {
-
-        storage = StorageOptions.getDefaultInstance().getService();
-        return storage;
     }
 
     public void disconnect() {

@@ -9,7 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gcs-maven</artifactId>
+    <artifactId>google-storage-wagon</artifactId>
+    <description>Google Cloud storage wagon</description>
 
     <properties>
         <gcs.version>1.20.0</gcs.version>
