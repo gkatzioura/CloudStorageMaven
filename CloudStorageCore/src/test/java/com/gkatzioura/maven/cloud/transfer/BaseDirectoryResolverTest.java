@@ -25,6 +25,24 @@ import com.gkatzioura.maven.cloud.resolver.BaseDirectoryResolver;
 public class BaseDirectoryResolverTest {
 
     @Test
+    public void testResolveEmptySlash() {
+
+        BaseDirectoryResolver directoryResolver = new BaseDirectoryResolver();
+        Repository repository = new Repository("test-repo","gs://test-repo/");
+        String baseDirectory = directoryResolver.resolve(repository);
+        Assert.assertTrue(baseDirectory.isEmpty());
+    }
+
+    @Test
+    public void testResolveEmpty() {
+
+        BaseDirectoryResolver directoryResolver = new BaseDirectoryResolver();
+        Repository repository = new Repository("test-repo","gs://test-repo");
+        String baseDirectory = directoryResolver.resolve(repository);
+        Assert.assertTrue(baseDirectory.isEmpty());
+    }
+
+    @Test
     public void testResolve() {
 
         BaseDirectoryResolver directoryResolver = new BaseDirectoryResolver();

@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -65,9 +66,16 @@ public class S3StorageRepository {
     public void connect(AuthenticationInfo authenticationInfo) throws AuthenticationException {
 
         try {
-            amazonS3 = AmazonS3ClientBuilder.standard()
-                                            .withCredentials(credentialsFactory.create(authenticationInfo))
-                                            .build();
+            Optional<String> region = new RegionProperty().get();
+
+            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
+                                                                 .withCredentials(credentialsFactory.create(authenticationInfo));
+
+            if(region.isPresent()) {
+                builder.withRegion(region.get());
+            }
+
+            amazonS3 = builder.build();
             amazonS3.listBuckets();
 
             LOGGER.debug("Connected to s3 using bucket {} with base direcctory ",bucket,baseDirectory);

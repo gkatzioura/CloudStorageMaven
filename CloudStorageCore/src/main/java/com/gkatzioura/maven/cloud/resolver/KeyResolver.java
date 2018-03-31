@@ -26,7 +26,7 @@ public class KeyResolver {
 
             if(s.startsWith("/")) s = s.replaceFirst("/","");
             builder.append(s);
-            if(!s.endsWith("/")) builder.append("/");
+            if(!s.isEmpty() && !s.endsWith("/")) builder.append("/");
         }
 
         return replaceLast(builder);
@@ -36,4 +36,7 @@ public class KeyResolver {
         stringBuilder.replace(stringBuilder.lastIndexOf("/"), stringBuilder.lastIndexOf("/") + 1, "" );
         return stringBuilder.toString();
     }
+
+
+
 }

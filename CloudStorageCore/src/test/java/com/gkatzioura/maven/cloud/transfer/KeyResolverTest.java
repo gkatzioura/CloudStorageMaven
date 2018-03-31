@@ -24,18 +24,34 @@ import com.gkatzioura.maven.cloud.resolver.KeyResolver;
 public class KeyResolverTest {
 
     @Test
+    public void resolveSlashDirectories() {
+
+        KeyResolver keyResolver = new KeyResolver();
+        String directoryJoin = keyResolver.resolve("/t/","/tesanother/key/");
+        Assert.assertEquals("t/tesanother/key", directoryJoin);
+    }
+
+    @Test
+    public void resolveEmptyBaseDirectory() {
+
+        KeyResolver keyResolver = new KeyResolver();
+        String directoryJoin = keyResolver.resolve("","/tesanother/key/");
+        Assert.assertEquals("tesanother/key", directoryJoin);
+    }
+
+    @Test
     public void testResolveSimple() {
 
-        KeyResolver keyResolver1 = new KeyResolver();
-        String directoryJoin = keyResolver1.resolve("/tesanother/key/");
+        KeyResolver keyResolver = new KeyResolver();
+        String directoryJoin = keyResolver.resolve("/tesanother/key/");
         Assert.assertEquals("tesanother/key", directoryJoin);
     }
 
     @Test
     public void testResolveConcat() {
 
-        KeyResolver keyResolver1 = new KeyResolver();
-        String directoryJoin = keyResolver1.resolve("test-repo/release/production/", "/tesanother/key");
+        KeyResolver keyResolver = new KeyResolver();
+        String directoryJoin = keyResolver.resolve("test-repo/release/production/", "/tesanother/key");
         Assert.assertEquals("test-repo/release/production/tesanother/key", directoryJoin);
     }
 
