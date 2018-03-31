@@ -57,6 +57,7 @@ public class S3StorageRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3StorageRepository.class);
 
     public S3StorageRepository(String bucket, String baseDirectory) {
+
         this.bucket = bucket;
         this.baseDirectory = baseDirectory;
     }
@@ -68,17 +69,26 @@ public class S3StorageRepository {
                                             .withCredentials(credentialsFactory.create(authenticationInfo))
                                             .build();
             amazonS3.listBuckets();
+
+            LOGGER.debug("Connected to s3 using bucket {} with base direcctory ",bucket,baseDirectory);
+
         } catch (Exception e) {
             throw new AuthenticationException("Could not authenticate",e);
         }
     }
 
-    public void copy(String resourceName, File destination, TransferProgress transferProgress) throws TransferFailedException {
+    public void copy(String resourceName, File destination, TransferProgress transferProgress) throws TransferFailedException, ResourceDoesNotExistException {
 
         final String key = resolveKey(resourceName);
 
         try {
-            S3Object s3Object = amazonS3.getObject(bucket, key);
+
+            final S3Object s3Object;
+            try {
+                s3Object = amazonS3.getObject(bucket, key);
+            } catch (AmazonS3Exception e) {
+                throw new ResourceDoesNotExistException("Resource does not exist");
+            }
 
             try(OutputStream outputStream = new TransferProgressFileOutputStream(destination,transferProgress);
                 InputStream inputStream = s3Object.getObjectContent()) {
@@ -100,6 +110,7 @@ public class S3StorageRepository {
                 amazonS3.putObject(putObjectRequest);
             }
         } catch (AmazonS3Exception | IOException e) {
+            LOGGER.error("Could not transfer file ",e);
             throw new TransferFailedException("Could not transfer file "+file.getName());
         }
     }
