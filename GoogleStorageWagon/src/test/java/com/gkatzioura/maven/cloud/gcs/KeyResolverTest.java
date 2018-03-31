@@ -3,6 +3,8 @@ package com.gkatzioura.maven.cloud.gcs;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.gkatzioura.maven.cloud.resolver.KeyResolver;
+
 public class KeyResolverTest {
 
     @Test

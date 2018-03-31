@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.gcs;
+package com.gkatzioura.maven.cloud.resolver;
 
 public class KeyResolver {
 

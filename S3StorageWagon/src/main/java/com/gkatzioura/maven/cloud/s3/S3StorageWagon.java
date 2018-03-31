@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.abs;
+package com.gkatzioura.maven.cloud.s3;
 
 import java.io.File;
 import java.util.List;
@@ -32,18 +32,19 @@ import org.apache.maven.wagon.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
 import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
 
-public class AzureStorageWagon extends AbstractStorageWagon {
+public class S3StorageWagon extends AbstractStorageWagon {
 
-    private AzureStorageRepository azureStorageRepository;
+    private S3StorageRepository s3StorageRepository;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageWagon.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(S3StorageWagon.class);
 
     @Override
-    public void get(String resourceName, File destination) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void get(String resourceName, File file) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
 
         Resource resource = new Resource(resourceName);
         transferListenerContainer.fireTransferInitiated(resource, TransferEvent.REQUEST_GET);
@@ -52,28 +53,10 @@ public class AzureStorageWagon extends AbstractStorageWagon {
         final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_GET, transferListenerContainer);
 
         try {
-            azureStorageRepository.copy(resourceName,destination,transferProgress);
+            s3StorageRepository.copy(resourceName,file,transferProgress);
             transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_GET);
         } catch (Exception e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_GET,e);
-            throw e;
-        }
-    }
-
-    @Override
-    public boolean getIfNewer(String resourceName, File file, long l) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-
-        Resource resource = new Resource(resourceName);
-
-        try {
-            if(azureStorageRepository.newResourceAvailable(resourceName, l)) {
-                get(resourceName,file);
-                return true;
-            }
-
-            return false;
-        } catch (TransferFailedException| ResourceDoesNotExistException| AuthorizationException e) {
-            this.transferListenerContainer.fireTransferError(resource, TransferEvent.REQUEST_GET, e);
             throw e;
         }
     }
@@ -90,12 +73,23 @@ public class AzureStorageWagon extends AbstractStorageWagon {
         final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
 
         try {
-            azureStorageRepository.put(file, resourceName,transferProgress);
+            s3StorageRepository.put(file, resourceName,transferProgress);
             transferListenerContainer.fireTransferCompleted(resource, TransferEvent.REQUEST_PUT);
         } catch (TransferFailedException e) {
             transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_PUT,e);
             throw e;
         }
+    }
+
+    @Override
+    public boolean getIfNewer(String resourceName, File file, long timeStamp) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+
+        if(s3StorageRepository.newResourceAvailable(resourceName,timeStamp)) {
+            get(resourceName,file);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -110,22 +104,15 @@ public class AzureStorageWagon extends AbstractStorageWagon {
 
     @Override
     public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
-        try {
-            return azureStorageRepository.exists(resourceName);
-        } catch (TransferFailedException e) {
-            transferListenerContainer.fireTransferError(new Resource(resourceName), TransferEvent.REQUEST_GET, e);
-            throw e;
-        }
+        return s3StorageRepository.exists(resourceName);
     }
 
     @Override
-    public List<String> getFileList(String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-
+    public List<String> getFileList(String s) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         try {
-            return azureStorageRepository.list(resourceName);
-        } catch (Exception e) {
-            transferListenerContainer.fireTransferError(new Resource(resourceName),TransferEvent.REQUEST_GET, e);
-            throw new TransferFailedException("Could not fetch resource");
+            return s3StorageRepository.list(s);
+        } catch (AmazonS3Exception e) {
+            throw new TransferFailedException("Could not fetch objects for prefix "+s);
         }
     }
 
@@ -135,27 +122,22 @@ public class AzureStorageWagon extends AbstractStorageWagon {
         this.repository = repository;
         this.sessionListenerContainer.fireSessionOpening();
 
-        try {
+        final String bucket = accountResolver.resolve(repository);
+        final String directory = containerResolver.resolve(repository);
 
-            final String account = accountResolver.resolve(repository);
-            final String container = containerResolver.resolve(repository);
+        LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
 
-            LOGGER.debug("Opening connection for account {} and container {}",account,container);
+        s3StorageRepository = new S3StorageRepository(bucket,directory);
+        s3StorageRepository.connect(authenticationInfo);
 
-            azureStorageRepository = new AzureStorageRepository(account,container);
-            azureStorageRepository.connect(authenticationInfo);
-            sessionListenerContainer.fireSessionLoggedIn();
-            sessionListenerContainer.fireSessionOpened();
-        } catch (Exception e) {
-            this.sessionListenerContainer.fireSessionConnectionRefused();
-            throw e;
-        }
+        sessionListenerContainer.fireSessionLoggedIn();
+        sessionListenerContainer.fireSessionOpened();
     }
 
     @Override
     public void disconnect() throws ConnectionException {
         sessionListenerContainer.fireSessionDisconnecting();
-        azureStorageRepository.disconnect();
+        s3StorageRepository.disconnect();
         sessionListenerContainer.fireSessionLoggedOff();
         sessionListenerContainer.fireSessionDisconnected();
     }

@@ -25,56 +25,25 @@ import java.util.List;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.events.TransferListener;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gkatzioura.maven.cloud.listener.SessionListenerContainer;
-import com.gkatzioura.maven.cloud.listener.SessionListenerContainerImpl;
-import com.gkatzioura.maven.cloud.listener.TransferListenerContainer;
-import com.gkatzioura.maven.cloud.listener.TransferListenerContainerImpl;
-import com.gkatzioura.maven.cloud.resolver.BaseDirectoryResolver;
-import com.gkatzioura.maven.cloud.resolver.BucketResolver;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
+import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
 
-public class GoogleStorageWagon implements Wagon {
+public class GoogleStorageWagon extends AbstractStorageWagon {
 
-    private static final boolean SUPPORTS_DIRECTORY_COPY = true;
-
-    private int connectionTimeOut = 0;
-    private int readConnectionTimeOut = 0;
-
-    private Repository repository = null;
     private GoogleStorageRepository googleStorageRepository;
 
-    private final BucketResolver bucketResolver;
-    private final BaseDirectoryResolver directoryResolver;
-
-    private final SessionListenerContainer sessionListenerContainer;
-    private final TransferListenerContainer transferListenerContainer;
-
-    private boolean interactive;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleStorageWagon.class);
-
-    public GoogleStorageWagon() {
-        this.bucketResolver = new BucketResolver();
-        this.directoryResolver = new BaseDirectoryResolver();
-        this.sessionListenerContainer = new SessionListenerContainerImpl(this);
-        this.transferListenerContainer = new TransferListenerContainerImpl(this);
-    }
 
     @Override
     public void get(String resourceName, File destination) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -111,7 +80,7 @@ public class GoogleStorageWagon implements Wagon {
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
-        TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
+        final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
 
         try(InputStream inputStream = new TransferProgressFileInputStream(file, transferProgress)) {
             googleStorageRepository.put(inputStream, resourceName);
@@ -142,61 +111,27 @@ public class GoogleStorageWagon implements Wagon {
     }
 
     @Override
-    public List<String> getFileList(String s) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-
-        return googleStorageRepository.list(s);
+    public List<String> getFileList(String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+            return googleStorageRepository.list(resourceName);
+        } catch (Exception e) {
+            transferListenerContainer.fireTransferError(new Resource(resourceName),TransferEvent.REQUEST_GET, e);
+            throw new TransferFailedException("Could not fetch resource");
+        }
     }
-
-    @Override
-    public boolean supportsDirectoryCopy() {
-        return SUPPORTS_DIRECTORY_COPY;
-    }
-
-    @Override
-    public Repository getRepository() {
-        return repository;
-    }
-
-    @Override
-    public void connect(Repository repository) throws ConnectionException, AuthenticationException {
-        connect(repository,null,(ProxyInfoProvider) null);
-    }
-
-    @Override
-    public void connect(Repository repository, ProxyInfo proxyInfo) throws ConnectionException, AuthenticationException {
-
-        connect(repository,null,proxyInfo);
-    }
-
-    @Override
-    public void connect(Repository repository, ProxyInfoProvider proxyInfoProvider) throws ConnectionException, AuthenticationException {
-
-        connect(repository, null, proxyInfoProvider);
-    }
-
-    @Override
-    public void connect(Repository repository, AuthenticationInfo authenticationInfo) throws ConnectionException, AuthenticationException {
-        connect(repository, authenticationInfo, (ProxyInfoProvider) null);
-    }
-
-    @Override
-    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo) throws ConnectionException, AuthenticationException {
-        connect(repository, authenticationInfo, p->{if((p == null) || (proxyInfo == null) || p.equalsIgnoreCase(proxyInfo.getType())) return proxyInfo;  else return null;});
-    }
-
 
     @Override
     public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) {
         this.repository = repository;
         this.sessionListenerContainer.fireSessionOpening();
         try {
-            final String bucket = bucketResolver.resolve(repository);
-            final String directory = directoryResolver.resolve(repository);
+            final String bucket = accountResolver.resolve(repository);
+            final String directory = containerResolver.resolve(repository);
 
             LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
 
             googleStorageRepository = new GoogleStorageRepository(bucket, directory);
-            googleStorageRepository.connect(repository);
+            googleStorageRepository.connect();
             sessionListenerContainer.fireSessionLoggedIn();
             sessionListenerContainer.fireSessionOpened();
         } catch (Exception e) {
@@ -206,73 +141,11 @@ public class GoogleStorageWagon implements Wagon {
     }
 
     @Override
-    @Deprecated
-    public void openConnection() throws ConnectionException, AuthenticationException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void disconnect() throws ConnectionException {
+        sessionListenerContainer.fireSessionDisconnecting();
         googleStorageRepository.disconnect();
+        sessionListenerContainer.fireSessionLoggedOff();
+        sessionListenerContainer.fireSessionDisconnected();
     }
 
-    @Override
-    public void setTimeout(int i) {
-        this.connectionTimeOut = i;
-    }
-
-    @Override
-    public int getTimeout() {
-        return connectionTimeOut;
-    }
-
-    @Override
-    public void setReadTimeout(int i) {
-        this.readConnectionTimeOut = i;
-    }
-
-    @Override
-    public int getReadTimeout() {
-        return readConnectionTimeOut;
-    }
-
-    @Override
-    public void addSessionListener(SessionListener sessionListener) {
-        sessionListenerContainer.addSessionListener(sessionListener);
-    }
-
-    @Override
-    public void removeSessionListener(SessionListener sessionListener) {
-        sessionListenerContainer.removeSessionListener(sessionListener);
-    }
-
-    @Override
-    public boolean hasSessionListener(SessionListener sessionListener) {
-        return sessionListenerContainer.hasSessionListener(sessionListener);
-    }
-
-    @Override
-    public void addTransferListener(TransferListener transferListener) {
-        transferListenerContainer.addTransferListener(transferListener);
-    }
-
-    @Override
-    public void removeTransferListener(TransferListener transferListener) {
-        transferListenerContainer.removeTransferListener(transferListener);
-    }
-
-    @Override
-    public boolean hasTransferListener(TransferListener transferListener) {
-        return transferListenerContainer.hasTransferListener(transferListener);
-    }
-
-    @Override
-    public boolean isInteractive() {
-        return interactive;
-    }
-
-    @Override
-    public void setInteractive(boolean b) {
-        interactive = b;
-    }
 }

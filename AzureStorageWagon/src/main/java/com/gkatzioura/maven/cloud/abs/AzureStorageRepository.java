@@ -112,7 +112,7 @@ public class AzureStorageRepository {
         }
     }
 
-    public boolean put(File file, String destination,TransferProgress transferProgress) throws TransferFailedException {
+    public void put(File file, String destination,TransferProgress transferProgress) throws TransferFailedException {
 
         LOGGER.debug("Uploading key {} ",destination);
 
@@ -127,8 +127,6 @@ public class AzureStorageRepository {
             LOGGER.error("Could not fetch cloud blob",e);
             throw new TransferFailedException(destination);
         }
-
-        return true;
     }
 
     public boolean exists(String resourceName) throws TransferFailedException {

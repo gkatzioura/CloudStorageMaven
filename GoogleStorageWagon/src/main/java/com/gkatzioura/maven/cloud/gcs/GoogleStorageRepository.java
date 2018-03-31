@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gkatzioura.maven.cloud.resolver.KeyResolver;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
@@ -47,7 +47,7 @@ public class GoogleStorageRepository {
         this.baseDirectory = directory;
     }
 
-    public void connect(Repository repository) {
+    public void connect() {
 
         storage = StorageOptions.getDefaultInstance().getService();
     }
@@ -83,7 +83,7 @@ public class GoogleStorageRepository {
         return updated>timeStamp;
     }
 
-    public boolean put(InputStream inputStream,String destination) {
+    public void put(InputStream inputStream,String destination) {
 
         String key = resolveKey(destination);
 
@@ -93,7 +93,6 @@ public class GoogleStorageRepository {
 
         Blob createdBlob = storage.create(blobInfo,inputStream);
         LOGGER.info("Blob created at {}",createdBlob.getCreateTime());
-        return true;
     }
 
     public List<String> list(String path) {
@@ -102,7 +101,7 @@ public class GoogleStorageRepository {
 
         LOGGER.info("Listing files for {}",path);
 
-        Page<Blob> page = storage.list(bucket, Storage.BlobListOption.prefix(path));
+        Page<Blob> page = storage.list(bucket, Storage.BlobListOption.prefix(key));
         return totalBlobs(page);
     }
 

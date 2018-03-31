@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.gkatzioura.maven.cloud</groupId>
-    <artifactId>cloud-storage</artifactId>
+    <artifactId>cloud-storage-maven</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
 
@@ -38,6 +38,7 @@
         <module>GoogleStorageWagon</module>
         <module>CloudStorageCore</module>
         <module>AzureStorageWagon</module>
+        <module>S3StorageWagon</module>
     </modules>
 
     <properties>
