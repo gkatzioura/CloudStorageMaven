@@ -34,13 +34,6 @@
         <url>https://github.com/gkatzioura/CloudStorage</url>
     </scm>
 
-    <modules>
-        <module>GoogleStorageWagon</module>
-        <module>CloudStorageCore</module>
-        <module>AzureStorageWagon</module>
-        <module>S3StorageWagon</module>
-    </modules>
-
     <properties>
         <wagon.version>3.0.0</wagon.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -48,6 +41,20 @@
         <commons-io.version>2.6</commons-io.version>
         <junit.version>4.12</junit.version>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <downloadUrl>https://oss.sonatype.org/content/groups/public/org/knowm/xchart</downloadUrl>
+    </distributionManagement>
 
     <build>
         <plugins>
@@ -84,7 +91,28 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <modules>
+        <module>GoogleStorageWagon</module>
+        <module>CloudStorageCore</module>
+        <module>AzureStorageWagon</module>
+        <module>S3StorageWagon</module>
+    </modules>
 
 </project>
