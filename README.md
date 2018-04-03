@@ -1,6 +1,6 @@
 # CloudStorageMaven
 
-The CloudStorageMaven projects aims to provide an easy way to host your java artificats without having to set up a maven repository.
+The CloudStorageMaven projects aims to provide an easy way to host your java artificats on the cloud without having to set up a maven repository.
 
 Cloud storage options supported:
 
