@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
@@ -121,7 +122,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
     }
 
     @Override
-    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) {
+    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) throws AuthenticationException {
         this.repository = repository;
         this.sessionListenerContainer.fireSessionOpening();
         try {
@@ -134,7 +135,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
             googleStorageRepository.connect();
             sessionListenerContainer.fireSessionLoggedIn();
             sessionListenerContainer.fireSessionOpened();
-        } catch (Exception e) {
+        } catch (AuthenticationException e) {
             this.sessionListenerContainer.fireSessionConnectionRefused();
             throw e;
         }

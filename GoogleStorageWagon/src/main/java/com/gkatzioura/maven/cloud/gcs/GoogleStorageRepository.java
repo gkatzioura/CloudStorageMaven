@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +48,15 @@ public class GoogleStorageRepository {
         this.baseDirectory = directory;
     }
 
-    public void connect() {
+    public void connect() throws AuthenticationException {
 
-        storage = StorageOptions.getDefaultInstance().getService();
+        try {
+            storage = StorageOptions.getDefaultInstance().getService();
+            storage.list(Storage.BucketListOption.pageSize(1));
+        } catch (Exception e) {
+            LOGGER.error("Could not establish connection with google cloud",e);
+            throw new AuthenticationException("Please configure you google cloud account by logging using gcloud and specify a default project");
+        }
     }
 
     public void copy(String resourceName, File destination) throws ResourceDoesNotExistException {

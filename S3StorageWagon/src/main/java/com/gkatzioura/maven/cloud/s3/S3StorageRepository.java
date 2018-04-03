@@ -68,8 +68,7 @@ public class S3StorageRepository {
         try {
             Optional<String> region = new RegionProperty().get();
 
-            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
-                                                                 .withCredentials(credentialsFactory.create(authenticationInfo));
+            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
 
             if(region.isPresent()) {
                 builder.withRegion(region.get());
@@ -81,6 +80,11 @@ public class S3StorageRepository {
             LOGGER.debug("Connected to s3 using bucket {} with base direcctory ",bucket,baseDirectory);
 
         } catch (Exception e) {
+
+            if(e.getMessage().contains("Unable to find a region via the region provider chain")) {
+                throw new AuthenticationException("Please provide a region as a property or an environmmental variable using AWS_DEFAULT_REGION");
+            }
+
             throw new AuthenticationException("Could not authenticate",e);
         }
     }

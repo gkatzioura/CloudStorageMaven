@@ -67,6 +67,7 @@ public class AzureStorageRepository {
         try {
             CloudStorageAccount cloudStorageAccount = CloudStorageAccount.parse(connectionString);
             blobContainer = cloudStorageAccount.createCloudBlobClient().getContainerReference("snapshot");
+            blobContainer.getMetadata();
         } catch (URISyntaxException |InvalidKeyException |StorageException e) {
             throw new AuthenticationException("Provide valid credentials");
         }
