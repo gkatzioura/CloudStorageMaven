@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.gkatzioura.maven.cloud</groupId>
     <artifactId>cloud-storage-maven</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
 
     <name>Cloud Storage</name>
     <description>The CloudStorage project enables you to use the storage options of cloud provides (Google Cloud) storage as maven repositories.</description>
@@ -32,7 +30,10 @@
 
     <scm>
         <url>https://github.com/gkatzioura/CloudStorage</url>
-    </scm>
+        <connection>scm:git:https://github.com/gkatzioura/CloudStorage.git</connection>
+        <developerConnection>scm:git:https://github.com/gkatzioura/CloudStorage.git</developerConnection>
+      <tag>HEAD</tag>
+  </scm>
 
     <properties>
         <wagon.version>3.0.0</wagon.version>
