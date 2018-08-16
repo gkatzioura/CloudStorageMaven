@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.gkatzioura.maven.cloud</groupId>
+    <groupId>io.github.ruschecker</groupId>
     <artifactId>cloud-storage-maven</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2</version>
 
     <name>Cloud Storage</name>
     <description>The CloudStorage project enables you to use the storage options of cloud provides (Google Cloud) storage as maven repositories.</description>
-    <url>https://github.com/gkatzioura/CloudStorage</url>
+    <url>https://github.com/ruschecker/CloudStorage</url>
 
     <licenses>
         <license>
@@ -26,13 +26,18 @@
             <organization>egkatzioura</organization>
             <organizationUrl>https://egkatzioura.com/</organizationUrl>
         </developer>
+        <developer>
+            <name>Vladimir Barinov</name>
+            <email>kazantip.ru@gmail.com</email>
+            <organization>vbarinov</organization>
+        </developer>
     </developers>
 
     <scm>
-        <url>https://github.com/gkatzioura/CloudStorage</url>
-        <connection>scm:git:https://github.com/gkatzioura/CloudStorage.git</connection>
-        <developerConnection>scm:git:https://github.com/gkatzioura/CloudStorage.git</developerConnection>
-      <tag>HEAD</tag>
+        <url>https://github.com/ruschecker/CloudStorage</url>
+        <connection>scm:git:https://github.com/ruschecker/CloudStorage.git</connection>
+        <developerConnection>scm:git:https://github.com/ruschecker/CloudStorage.git</developerConnection>
+      <tag>1.2</tag>
   </scm>
 
     <properties>
