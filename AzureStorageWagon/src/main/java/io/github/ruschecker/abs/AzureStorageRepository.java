@@ -34,9 +34,9 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gkatzioura.maven.cloud.transfer.TransferProgress;
-import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
-import com.gkatzioura.maven.cloud.transfer.TransferProgressFileOutputStream;
+import io.github.ruschecker.transfer.TransferProgress;
+import io.github.ruschecker.transfer.TransferProgressFileInputStream;
+import io.github.ruschecker.transfer.TransferProgressFileOutputStream;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlob;

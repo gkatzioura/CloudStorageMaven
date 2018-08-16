@@ -32,9 +32,9 @@ import org.apache.maven.wagon.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gkatzioura.maven.cloud.transfer.TransferProgress;
-import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
-import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
+import io.github.ruschecker.transfer.TransferProgress;
+import io.github.ruschecker.transfer.TransferProgressImpl;
+import io.github.ruschecker.wagon.AbstractStorageWagon;
 
 public class AzureStorageWagon extends AbstractStorageWagon {
 
