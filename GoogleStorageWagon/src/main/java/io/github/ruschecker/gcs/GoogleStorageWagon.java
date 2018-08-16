@@ -1,0 +1,152 @@
+/*
+ * Copyright 2018 Emmanouil Gkatziouras
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.github.ruschecker.gcs;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import io.github.ruschecker.transfer.TransferProgress;
+import io.github.ruschecker.transfer.TransferProgressImpl;
+import io.github.ruschecker.wagon.AbstractStorageWagon;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.github.ruschecker.transfer.TransferProgressFileInputStream;
+
+public class GoogleStorageWagon extends AbstractStorageWagon {
+
+    private GoogleStorageRepository googleStorageRepository;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleStorageWagon.class);
+
+    @Override
+    public void get(String resourceName, File destination) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+
+        Resource resource = new Resource(resourceName);
+        transferListenerContainer.fireTransferInitiated(resource, TransferEvent.REQUEST_GET);
+        transferListenerContainer.fireTransferStarted(resource, TransferEvent.REQUEST_GET);
+
+        try {
+            googleStorageRepository.copy(resourceName, destination);
+            transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_GET);
+        } catch (Exception e) {
+            transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_GET,e);
+            throw e;
+        }
+    }
+
+    @Override
+    public boolean getIfNewer(String s, File file, long l) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        if(googleStorageRepository.newResourceAvailable(s, l)) {
+            get(s,file);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void put(File file, String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+
+        Resource resource = new Resource(resourceName);
+
+        LOGGER.debug("Uploading file {} to {}",file.getAbsolutePath(),resourceName);
+
+        transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
+        transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
+        final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
+
+        try(InputStream inputStream = new TransferProgressFileInputStream(file, transferProgress)) {
+            googleStorageRepository.put(inputStream, resourceName);
+            transferListenerContainer.fireTransferCompleted(resource,TransferEvent.REQUEST_PUT);
+        } catch (FileNotFoundException e) {
+            transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_PUT,e);
+            throw new ResourceDoesNotExistException("Faild to transfer artifact",e);
+        } catch (IOException e) {
+            transferListenerContainer.fireTransferError(resource,TransferEvent.REQUEST_PUT,e);
+            throw new TransferFailedException("Faild to transfer artifact",e);
+        }
+    }
+
+    @Override
+    public void putDirectory(File source, String destination) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        File[] files = source.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                put(f, destination + "/" + f.getName());
+            }
+        }
+    }
+
+    @Override
+    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
+
+        return googleStorageRepository.exists(resourceName);
+    }
+
+    @Override
+    public List<String> getFileList(String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+            return googleStorageRepository.list(resourceName);
+        } catch (Exception e) {
+            transferListenerContainer.fireTransferError(new Resource(resourceName),TransferEvent.REQUEST_GET, e);
+            throw new TransferFailedException("Could not fetch resource");
+        }
+    }
+
+    @Override
+    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider) throws AuthenticationException {
+        this.repository = repository;
+        this.sessionListenerContainer.fireSessionOpening();
+        try {
+            final String bucket = accountResolver.resolve(repository);
+            final String directory = containerResolver.resolve(repository);
+
+            LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
+
+            googleStorageRepository = new GoogleStorageRepository(bucket, directory);
+            googleStorageRepository.connect();
+            sessionListenerContainer.fireSessionLoggedIn();
+            sessionListenerContainer.fireSessionOpened();
+        } catch (AuthenticationException e) {
+            this.sessionListenerContainer.fireSessionConnectionRefused();
+            throw e;
+        }
+    }
+
+    @Override
+    public void disconnect() throws ConnectionException {
+        sessionListenerContainer.fireSessionDisconnecting();
+        googleStorageRepository.disconnect();
+        sessionListenerContainer.fireSessionLoggedOff();
+        sessionListenerContainer.fireSessionDisconnected();
+    }
+
+}
