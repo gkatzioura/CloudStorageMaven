@@ -40,6 +40,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.gkatzioura.maven.cloud.resolver.KeyResolver;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
@@ -68,7 +69,7 @@ public class S3StorageRepository {
         try {
             Optional<String> region = new RegionProperty().get();
 
-            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
+            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(new InstanceProfileCredentialsProvider(false));
 
             if(region.isPresent()) {
                 builder.withRegion(region.get());
