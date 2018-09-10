@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -50,7 +51,6 @@ public class S3StorageRepository {
     private final String bucket;
     private final String baseDirectory;
 
-    private final CredentialsFactory credentialsFactory = new CredentialsFactory();
     private final KeyResolver keyResolver = new KeyResolver();
 
     private AmazonS3 amazonS3;
@@ -68,7 +68,7 @@ public class S3StorageRepository {
         try {
             Optional<String> region = new RegionProperty().get();
 
-            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
+            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(new DefaultAWSCredentialsProviderChain());
 
             if(region.isPresent()) {
                 builder.withRegion(region.get());
