@@ -52,7 +52,7 @@ public class GoogleStorageRepository {
 
         try {
             storage = StorageOptions.getDefaultInstance().getService();
-            storage.list(Storage.BucketListOption.pageSize(1));
+            storage.list(bucket, Storage.BlobListOption.pageSize(1));
         } catch (Exception e) {
             LOGGER.error("Could not establish connection with google cloud",e);
             throw new AuthenticationException("Please configure you google cloud account by logging using gcloud and specify a default project");
