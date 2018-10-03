@@ -19,6 +19,7 @@ package com.gkatzioura.maven.cloud.abs;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -81,6 +82,7 @@ public class AzureStorageWagon extends AbstractStorageWagon {
     @Override
     public void put(File file, String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
 
+        resourceName = FilenameUtils.normalize(resourceName, true);
         Resource resource = new Resource(resourceName);
 
         LOGGER.debug("Uploading file {} to {}",file.getAbsolutePath(),resourceName);
@@ -103,7 +105,11 @@ public class AzureStorageWagon extends AbstractStorageWagon {
         File[] files = source.listFiles();
         if (files != null) {
             for (File f : files) {
-                put(f, destination + "/" + f.getName());
+                if (f.isDirectory()) {
+                    putDirectory(f, destination + "/" + f.getName());
+                } else {
+                    put(f, destination + "/" + f.getName());
+                }
             }
         }
     }
