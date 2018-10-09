@@ -8,12 +8,10 @@ The GoogleStorageWagon project enables you to upload your artifacts to a google 
         <extension>
             <groupId>com.gkatzioura.maven.cloud</groupId>
             <artifactId>google-storage-wagon</artifactId>
-            <version>1.0</version>
+            <version>1.2</version>
         </extension>
     </extensions>
 </build>
 ```
 
-Full guide here
-
-https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-google-cloud-storage/
+Full guide on https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-google-cloud-storage/
