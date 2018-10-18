@@ -40,6 +40,8 @@ import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
 public class S3StorageWagon extends AbstractStorageWagon {
 
     private S3StorageRepository s3StorageRepository;
+    
+    private String region;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(S3StorageWagon.class);
 
@@ -126,9 +128,8 @@ public class S3StorageWagon extends AbstractStorageWagon {
         final String directory = containerResolver.resolve(repository);
 
         LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
-
         s3StorageRepository = new S3StorageRepository(bucket,directory);
-        s3StorageRepository.connect(authenticationInfo);
+        s3StorageRepository.connect(authenticationInfo, region);
 
         sessionListenerContainer.fireSessionLoggedIn();
         sessionListenerContainer.fireSessionOpened();
@@ -141,5 +142,13 @@ public class S3StorageWagon extends AbstractStorageWagon {
         sessionListenerContainer.fireSessionLoggedOff();
         sessionListenerContainer.fireSessionDisconnected();
     }
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
 
 }
