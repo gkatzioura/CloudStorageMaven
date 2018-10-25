@@ -66,13 +66,18 @@ public class S3StorageRepository {
     public void connect(AuthenticationInfo authenticationInfo, String region) throws AuthenticationException {
 
         try {
-            Optional<String> regionProperty = new RegionProperty().get();
-            if (region == null && regionProperty.isPresent()) {
-            	region = regionProperty.get();
+            final Optional<String> regionOpt;
+            if (region != null) {
+                regionOpt = Optional.of(region);
+            } else {
+                regionOpt = new RegionProperty().get();
             }
 
-            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo))
-            		.withRegion(region);
+            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
+
+            if(regionOpt.isPresent()) {
+                builder.withRegion(regionOpt.get());
+            }
 
             amazonS3 = builder.build();
             amazonS3.listBuckets();
