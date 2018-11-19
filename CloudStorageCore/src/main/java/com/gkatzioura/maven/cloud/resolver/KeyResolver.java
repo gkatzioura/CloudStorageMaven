@@ -18,25 +18,25 @@ package com.gkatzioura.maven.cloud.resolver;
 
 public class KeyResolver {
 
-    public String resolve(String... paths) {
+    public String resolve(String base, String path) {
+        return stripStartingSlash(combine(base, path));
+    }
 
-        StringBuilder builder = new StringBuilder();
+    private String combine(String base, String path) {
+        path = stripStartingSlash(path);
 
-        for(String s : paths) {
-
-            if(s.startsWith("/")) s = s.replaceFirst("/","");
-            builder.append(s);
-            if(!s.isEmpty() && !s.endsWith("/")) builder.append("/");
+        if(base.endsWith("/")) {
+            return base + path;
+        } else {
+            return base + "/" + path;
         }
-
-        return replaceLast(builder);
     }
 
-    private String replaceLast(StringBuilder stringBuilder) {
-        stringBuilder.replace(stringBuilder.lastIndexOf("/"), stringBuilder.lastIndexOf("/") + 1, "" );
-        return stringBuilder.toString();
+    private String stripStartingSlash(String path) {
+        if(path.startsWith("/")) {
+            return path.replaceFirst("/", "");
+        } else {
+            return path;
+        }
     }
-
-
-
 }

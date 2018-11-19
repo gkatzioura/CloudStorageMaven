@@ -28,23 +28,14 @@ public class KeyResolverTest {
 
         KeyResolver keyResolver = new KeyResolver();
         String directoryJoin = keyResolver.resolve("/t/","/tesanother/key/");
-        Assert.assertEquals("t/tesanother/key", directoryJoin);
+        Assert.assertEquals("t/tesanother/key/", directoryJoin);
     }
 
     @Test
     public void resolveEmptyBaseDirectory() {
-
         KeyResolver keyResolver = new KeyResolver();
         String directoryJoin = keyResolver.resolve("","/tesanother/key/");
-        Assert.assertEquals("tesanother/key", directoryJoin);
-    }
-
-    @Test
-    public void testResolveSimple() {
-
-        KeyResolver keyResolver = new KeyResolver();
-        String directoryJoin = keyResolver.resolve("/tesanother/key/");
-        Assert.assertEquals("tesanother/key", directoryJoin);
+        Assert.assertEquals("tesanother/key/", directoryJoin);
     }
 
     @Test

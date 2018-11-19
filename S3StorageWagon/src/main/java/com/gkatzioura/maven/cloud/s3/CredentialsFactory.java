@@ -19,6 +19,7 @@ package com.gkatzioura.maven.cloud.s3;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -26,10 +27,15 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 public class CredentialsFactory {
 
     public AWSCredentialsProvider create(AuthenticationInfo authenticationInfo) {
-        if(authenticationInfo==null) {
-            return new DefaultAWSCredentialsProviderChain();
+        if(authenticationInfo != null && authenticationInfo.getUserName() != null && authenticationInfo.getPassword() != null) {
+            return new AWSCredentialsProviderChain(
+                    new AWSStaticCredentialsProvider(
+                            new BasicAWSCredentials(
+                                    authenticationInfo.getUserName(),
+                                    authenticationInfo.getPassword())),
+                    new DefaultAWSCredentialsProviderChain());
         } else {
-            return new AWSStaticCredentialsProvider(new BasicAWSCredentials(authenticationInfo.getUserName(),authenticationInfo.getPassword()));
+            return new DefaultAWSCredentialsProviderChain();
         }
     }
 }

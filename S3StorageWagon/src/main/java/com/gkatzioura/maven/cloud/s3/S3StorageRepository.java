@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -98,6 +100,8 @@ public class S3StorageRepository {
 
         final String key = resolveKey(resourceName);
 
+        destination.getParentFile().mkdirs();  // ensure location can be copied to
+
         try {
 
             final S3Object s3Object;
@@ -150,25 +154,39 @@ public class S3StorageRepository {
     }
 
 
-    public List<String> list(String path) {
+    public List<String> list(String path) throws ResourceDoesNotExistException {
 
         String key = resolveKey(path);
 
         ObjectListing objectListing = amazonS3.listObjects(new ListObjectsRequest()
                     .withBucketName(bucket)
-                    .withPrefix(key));
+                    .withPrefix(key)
+                    .withDelimiter("/"));  // makes us traverse as if using directories
+
 
         return totalObjects(objectListing);
     }
 
-    private List<String> totalObjects(ObjectListing objectListing) {
+    private List<String> totalObjects(ObjectListing objectListing) throws ResourceDoesNotExistException {
 
-        List<String> objects = new ArrayList<>();
+        int prefixLength = objectListing.getPrefix().length();
 
-        objectListing.getObjectSummaries().forEach(os->objects.add(os.getKey()));
+        if(objectListing.getObjectSummaries().isEmpty() && objectListing.getCommonPrefixes().isEmpty()) {
+            // part of the Wagon.listObjects contract
+            throw new ResourceDoesNotExistException(objectListing.getPrefix() + " is not a directory");
+        }
+
+        List<String> objects = Stream.concat(
+                        objectListing.getObjectSummaries()  // objects directly inside this "directory"
+                            .stream()
+                            .map(os->os.getKey().substring(prefixLength))  // ditch the prefix to return relative path
+                            .filter(i->i.length() > 0),  // in case there's an object that matches the "directory"
+                        objectListing.getCommonPrefixes()  // nested "directories"
+                            .stream()
+                            .map(k->k.substring(prefixLength))  // ditch the prefix to return relative path
+                ).collect(Collectors.toList());
 
         if(objectListing.isTruncated()) {
-
             ObjectListing nextObjectListing = amazonS3.listNextBatchOfObjects(objectListing);
             objects.addAll(totalObjects(nextObjectListing));
         }
@@ -193,7 +211,7 @@ public class S3StorageRepository {
     }
 
     private String resolveKey(String path) {
-        return keyResolver.resolve(baseDirectory,path);
+        return keyResolver.resolve(baseDirectory, path);
     }
 
 }
