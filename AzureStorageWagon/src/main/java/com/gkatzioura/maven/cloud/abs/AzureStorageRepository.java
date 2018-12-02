@@ -25,14 +25,14 @@ import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
@@ -53,7 +53,7 @@ public class AzureStorageRepository {
 
     private CloudBlobContainer blobContainer;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageRepository.class);
+    private static final Logger LOGGER = Logger.getLogger(AzureStorageRepository.class.getName());
 
     public AzureStorageRepository(String storageAccount, String directory) {
         this.connectionStringFactory = new ConnectionStringFactory();
@@ -75,14 +75,14 @@ public class AzureStorageRepository {
 
     public void copy(String resourceName, File destination, TransferProgress transferProgress) throws ResourceDoesNotExistException {
 
-        LOGGER.debug("Downloading key {} from container {} into {}",resourceName,container,destination.getAbsolutePath());
+        LOGGER.log(Level.FINER,String.format("Downloading key %s from container %s into %s", resourceName, container, destination.getAbsolutePath()));
 
         try {
 
             CloudBlob cloudBlob = blobContainer.getBlobReferenceFromServer(resourceName);
 
             if(!cloudBlob.exists()) {
-                LOGGER.debug("Blob {} does not exist",resourceName);
+                LOGGER.log(Level.FINER,"Blob {} does not exist",resourceName);
                 throw new ResourceDoesNotExistException(resourceName);
             }
 
@@ -97,7 +97,7 @@ public class AzureStorageRepository {
 
     public boolean newResourceAvailable(String resourceName,long timeStamp) throws ResourceDoesNotExistException{
 
-        LOGGER.debug("Checking if new key {} exists",resourceName);
+        LOGGER.log(Level.FINER,String.format("Checking if new key %s exists",resourceName));
 
         try {
             CloudBlob cloudBlob = blobContainer.getBlobReferenceFromServer(resourceName);
@@ -108,14 +108,14 @@ public class AzureStorageRepository {
             long updated = cloudBlob.getProperties().getLastModified().getTime();
             return updated>timeStamp;
         } catch (URISyntaxException |StorageException e) {
-            LOGGER.error("Could not fetch cloud blob",e);
+            LOGGER.log(Level.SEVERE,"Could not fetch cloud blob",e);
             throw new ResourceDoesNotExistException(resourceName);
         }
     }
 
     public void put(File file, String destination,TransferProgress transferProgress) throws TransferFailedException {
 
-        LOGGER.debug("Uploading key {} ",destination);
+        LOGGER.log(Level.FINER,String.format("Uploading key %s ",destination));
 
         try {
 
@@ -125,7 +125,7 @@ public class AzureStorageRepository {
                 blob.upload(inputStream,-1);
             }
         } catch (URISyntaxException |StorageException | IOException e) {
-            LOGGER.error("Could not fetch cloud blob",e);
+            LOGGER.log(Level.SEVERE,"Could not fetch cloud blob",e);
             throw new TransferFailedException(destination);
         }
     }
@@ -136,14 +136,14 @@ public class AzureStorageRepository {
             CloudBlockBlob blob = blobContainer.getBlockBlobReference(resourceName);
             return blob.exists();
         } catch (URISyntaxException |StorageException e) {
-            LOGGER.error("Could not fetch cloud blob",e);
+            LOGGER.log(Level.SEVERE,"Could not fetch cloud blob",e);
             throw new TransferFailedException(resourceName);
         }
     }
 
     public List<String> list(String path) {
 
-        LOGGER.info("Listing files for {}",path);
+        LOGGER.info(String.format("Listing files for %s",path));
 
         List<String> blobs = new ArrayList<>();
 
