@@ -23,14 +23,14 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -55,7 +55,7 @@ public class S3StorageRepository {
 
     private AmazonS3 amazonS3;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(S3StorageRepository.class);
+    private static final Logger LOGGER = Logger.getLogger(S3StorageRepository.class.getName());
 
     public S3StorageRepository(String bucket, String baseDirectory) {
 
@@ -82,7 +82,7 @@ public class S3StorageRepository {
             amazonS3 = builder.build();
             amazonS3.listBuckets();
 
-            LOGGER.debug("Connected to s3 using bucket {} with base direcctory ",bucket,baseDirectory);
+            LOGGER.info(Level.FINER,String.format("Connected to s3 using bucket %s with base direcctory %s",bucket,baseDirectory));
 
         } catch (Exception e) {
 
@@ -112,7 +112,7 @@ public class S3StorageRepository {
                 IOUtils.copy(inputStream,outputStream);
             }
         } catch (AmazonS3Exception |IOException e) {
-            LOGGER.error("Could not transfer file",e);
+            LOGGER.log(Level.SEVERE,"Could not transfer file", e);
             throw new TransferFailedException("Could not download resource "+key);
         }
     }
@@ -127,7 +127,7 @@ public class S3StorageRepository {
                 amazonS3.putObject(putObjectRequest);
             }
         } catch (AmazonS3Exception | IOException e) {
-            LOGGER.error("Could not transfer file ",e);
+            LOGGER.log(Level.SEVERE,"Could not transfer file ",e);
             throw new TransferFailedException("Could not transfer file "+file.getName());
         }
     }
@@ -136,7 +136,7 @@ public class S3StorageRepository {
 
         final String key = resolveKey(resourceName);
 
-        LOGGER.debug("Checking if new key {} exists",key);
+        LOGGER.log(Level.FINER,String.format("Checking if new key %s exists",key));
 
         try {
             ObjectMetadata objectMetadata = amazonS3.getObjectMetadata(bucket, key);
@@ -144,7 +144,7 @@ public class S3StorageRepository {
             long updated = objectMetadata.getLastModified().getTime();
             return updated>timeStamp;
         } catch (AmazonS3Exception e) {
-            LOGGER.error("Could not retrieve {}",key,e);
+            LOGGER.log(Level.SEVERE,String.format("Could not retrieve %s",key),e);
             throw new ResourceDoesNotExistException("Could not retrieve key "+key);
         }
     }

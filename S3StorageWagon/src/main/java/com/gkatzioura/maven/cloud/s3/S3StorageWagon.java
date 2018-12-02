@@ -18,6 +18,8 @@ package com.gkatzioura.maven.cloud.s3;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -29,8 +31,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
@@ -43,7 +43,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
     
     private String region;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(S3StorageWagon.class);
+    private static final Logger LOGGER = Logger.getLogger(S3StorageWagon.class.getName());
 
     @Override
     public void get(String resourceName, File file) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -68,7 +68,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
 
         Resource resource = new Resource(resourceName);
 
-        LOGGER.debug("Uploading file {} to {}",file.getAbsolutePath(),resourceName);
+        LOGGER.log(Level.FINER, String.format("Uploading file %s to %s", file.getAbsolutePath(), resourceName));
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
@@ -127,7 +127,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
         final String bucket = accountResolver.resolve(repository);
         final String directory = containerResolver.resolve(repository);
 
-        LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
+        LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
         s3StorageRepository = new S3StorageRepository(bucket,directory);
         s3StorageRepository.connect(authenticationInfo, region);
 

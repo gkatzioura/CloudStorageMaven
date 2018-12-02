@@ -16,16 +16,16 @@
 
 package com.gkatzioura.maven.cloud.abs;
 
+import java.util.logging.Logger;
+
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConnectionStringFactory {
 
     private static final String CONNECTION_STRING_TEMPLATE = "DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionStringFactory.class);
+    private static final Logger LOGGER = Logger.getLogger(ConnectionStringFactory.class.getName());
 
     public String create(AuthenticationInfo authenticationInfo) throws AuthenticationException {
 

@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -32,8 +34,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
@@ -44,7 +44,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
 
     private GoogleStorageRepository googleStorageRepository;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleStorageWagon.class);
+    private static final Logger LOGGER = Logger.getLogger(GoogleStorageWagon.class.getName());
 
     @Override
     public void get(String resourceName, File destination) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -77,7 +77,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
 
         Resource resource = new Resource(resourceName);
 
-        LOGGER.debug("Uploading file {} to {}",file.getAbsolutePath(),resourceName);
+        LOGGER.log(Level.FINER, String.format("Uploading file %s to %s", file.getAbsolutePath(), resourceName));
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
@@ -129,7 +129,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
             final String bucket = accountResolver.resolve(repository);
             final String directory = containerResolver.resolve(repository);
 
-            LOGGER.debug("Opening connection for bucket {} and directory {}",bucket,directory);
+            LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
 
             googleStorageRepository = new GoogleStorageRepository(bucket, directory);
             googleStorageRepository.connect();

@@ -18,6 +18,8 @@ package com.gkatzioura.maven.cloud.abs;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.wagon.ConnectionException;
@@ -30,8 +32,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
@@ -41,7 +41,7 @@ public class AzureStorageWagon extends AbstractStorageWagon {
 
     private AzureStorageRepository azureStorageRepository;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageWagon.class);
+    private static final Logger LOGGER = Logger.getLogger(AzureStorageWagon.class.getName());
 
     @Override
     public void get(String resourceName, File destination) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -85,7 +85,7 @@ public class AzureStorageWagon extends AbstractStorageWagon {
         resourceName = FilenameUtils.normalize(resourceName, true);
         Resource resource = new Resource(resourceName);
 
-        LOGGER.debug("Uploading file {} to {}",file.getAbsolutePath(),resourceName);
+        LOGGER.log(Level.FINER, String.format("Uploading file %s to %s", file.getAbsolutePath(), resourceName));
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
         transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
@@ -146,7 +146,7 @@ public class AzureStorageWagon extends AbstractStorageWagon {
             final String account = accountResolver.resolve(repository);
             final String container = containerResolver.resolve(repository);
 
-            LOGGER.debug("Opening connection for account {} and container {}",account,container);
+            LOGGER.log(Level.FINER,String.format("Opening connection for account %s and container %s",account,container));
 
             azureStorageRepository = new AzureStorageRepository(account,container);
             azureStorageRepository.connect(authenticationInfo);

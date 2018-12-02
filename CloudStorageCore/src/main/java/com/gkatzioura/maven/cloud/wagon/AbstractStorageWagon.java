@@ -16,6 +16,8 @@
 
 package com.gkatzioura.maven.cloud.wagon;
 
+import java.util.logging.Logger;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -25,8 +27,6 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.gkatzioura.maven.cloud.listener.SessionListenerContainer;
 import com.gkatzioura.maven.cloud.listener.SessionListenerContainerImpl;
@@ -52,7 +52,7 @@ public abstract class AbstractStorageWagon implements Wagon {
 
     private boolean interactive;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStorageWagon.class);
+    private static final Logger LOGGER = Logger.getLogger(AbstractStorageWagon.class.getName());
 
     public AbstractStorageWagon() {
         this.accountResolver = new BucketResolver();
