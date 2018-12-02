@@ -82,7 +82,7 @@ public class S3StorageRepository {
             amazonS3 = builder.build();
             amazonS3.listBuckets();
 
-            LOGGER.info(Level.FINER,String.format("Connected to s3 using bucket %s with base direcctory %s",bucket,baseDirectory));
+            LOGGER.log(Level.FINER,String.format("Connected to s3 using bucket %s with base directory %s",bucket,baseDirectory));
 
         } catch (Exception e) {
 
