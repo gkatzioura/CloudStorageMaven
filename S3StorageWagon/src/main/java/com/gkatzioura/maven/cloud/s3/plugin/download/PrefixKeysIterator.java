@@ -65,6 +65,10 @@ public class PrefixKeysIterator implements Iterator<String> {
 
     @Override
     public String next() {
+        if(!hasNext()) {
+            return null;
+        }
+
         return currentKeys.remove(0).getKey();
     }
 
