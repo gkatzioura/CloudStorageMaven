@@ -5,6 +5,7 @@
         <groupId>com.gkatzioura.maven.cloud</groupId>
         <version>1.6-SNAPSHOT</version>
     </parent>
+    <version>1.7</version>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>s3-storage-wagon</artifactId>
@@ -12,6 +13,7 @@
 
     <properties>
         <aws-s3.version>1.11.418</aws-s3.version>
+        <httpcore>4.4.10</httpcore>
     </properties>
 
     <licenses>
@@ -21,7 +23,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.maven.wagon</groupId>
@@ -54,6 +55,11 @@
             <artifactId>maven-plugin-annotations</artifactId>
             <version>3.4</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>${httpcore}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

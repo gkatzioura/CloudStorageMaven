@@ -16,18 +16,23 @@
 
 package com.gkatzioura.maven.cloud.s3;
 
+import com.amazonaws.regions.Regions;
+
 import java.util.Optional;
 
 public class RegionProperty {
 
     private static final String AWS_DEFAULT_REGION_TAG = "AWS_DEFAULT_REGION";
 
+    /**
+     * return the region set using  the AWS_DEFAULT_REGION system property or the default AWS region (us_west_2)
+     * */
     public Optional<String> get() {
 
         String region = System.getProperty("AWS_DEFAULT_REGION");
 
         if(region==null) {
-            return Optional.empty();
+            return Optional.of(Regions.DEFAULT_REGION.getName());
         }
 
         return Optional.of(region);

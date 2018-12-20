@@ -26,6 +26,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.SdkClientException;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -68,7 +70,7 @@ public class S3StorageRepository {
     }
 
     public void connect(AuthenticationInfo authenticationInfo, String region) throws AuthenticationException {
-
+        AmazonS3ClientBuilder builder = null;
         try {
             final Optional<String> regionOpt;
             if (region != null) {
@@ -77,23 +79,35 @@ public class S3StorageRepository {
                 regionOpt = new RegionProperty().get();
             }
 
-            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
+            builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
 
-            if(regionOpt.isPresent()) {
+            String endpoint = System.getProperty("S3_ENDPOINT", null);
+            if (endpoint != null){
+                builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint, regionOpt.get()));
+            }else {
                 builder.withRegion(regionOpt.get());
             }
+
+
+            builder.setPathStyleAccessEnabled(Boolean.getBoolean("S3_PATH_STYLE_ENABLED"));
 
             amazonS3 = builder.build();
             amazonS3.listBuckets();
 
             LOGGER.log(Level.FINER,String.format("Connected to s3 using bucket %s with base directory %s",bucket,baseDirectory));
 
-        } catch (Exception e) {
-
-            if(e.getMessage().contains("Unable to find a region via the region provider chain")) {
-                throw new AuthenticationException("Please provide a region as a property or an environmmental variable using AWS_DEFAULT_REGION");
+        } catch (SdkClientException e) {
+            if (builder != null){
+                StringBuilder message = new StringBuilder();
+                message.append("Failed to connect");
+                if (builder.getEndpoint() != null){
+                    message.append(" to endpoint ["+ builder.getEndpoint().getServiceEndpoint()+"]");
+                    message.append(" using region [" + builder.getEndpoint().getSigningRegion() + "]");
+                }else {
+                    message.append(" using region [" + builder.getRegion() + "]");
+                }
+                throw new AuthenticationException(message.toString(), e);
             }
-
             throw new AuthenticationException("Could not authenticate",e);
         }
     }
