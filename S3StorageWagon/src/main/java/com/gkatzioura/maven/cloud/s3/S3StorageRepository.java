@@ -69,27 +69,21 @@ public class S3StorageRepository {
         this.baseDirectory = baseDirectory;
     }
 
-    public void connect(AuthenticationInfo authenticationInfo, String region) throws AuthenticationException {
+    public void connect(AuthenticationInfo authenticationInfo, RegionProperty region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
         AmazonS3ClientBuilder builder = null;
         try {
             final Optional<String> regionOpt;
-            if (region != null) {
-                regionOpt = Optional.of(region);
-            } else {
-                regionOpt = new RegionProperty().get();
-            }
 
             builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
 
-            String endpoint = System.getProperty("S3_ENDPOINT", null);
-            if (endpoint != null){
-                builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint, regionOpt.get()));
+            if (endpoint.get() != null){
+                builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), region.get()));
             }else {
-                builder.withRegion(regionOpt.get());
+                builder.withRegion(region.get());
             }
 
 
-            builder.setPathStyleAccessEnabled(Boolean.getBoolean("S3_PATH_STYLE_ENABLED"));
+            builder.setPathStyleAccessEnabled(pathStyle.get());
 
             amazonS3 = builder.build();
             amazonS3.listBuckets();

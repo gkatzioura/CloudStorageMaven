@@ -44,6 +44,8 @@ public class S3StorageWagon extends AbstractStorageWagon {
     private String region;
 
     private static final Logger LOGGER = Logger.getLogger(S3StorageWagon.class.getName());
+    private String endpoint;
+    private String pathStyleEnabled;
 
     @Override
     public void get(String resourceName, File file) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -129,7 +131,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
 
         LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
         s3StorageRepository = new S3StorageRepository(bucket,directory);
-        s3StorageRepository.connect(authenticationInfo, region);
+        s3StorageRepository.connect(authenticationInfo, new RegionProperty(region), new EndpointProperty(endpoint), new PathStyleEnabledProperty(pathStyleEnabled));
 
         sessionListenerContainer.fireSessionLoggedIn();
         sessionListenerContainer.fireSessionOpened();
@@ -150,5 +152,21 @@ public class S3StorageWagon extends AbstractStorageWagon {
 	public void setRegion(String region) {
 		this.region = region;
 	}
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public String getPathStyleAccessEnabled() {
+        return pathStyleEnabled;
+    }
+
+    public void setPathStyleAccessEnabled(String pathStyleEnabled) {
+        this.pathStyleEnabled = pathStyleEnabled;
+    }
 
 }

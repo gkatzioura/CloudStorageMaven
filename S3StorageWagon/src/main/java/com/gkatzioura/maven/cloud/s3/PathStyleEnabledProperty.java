@@ -16,36 +16,33 @@
 
 package com.gkatzioura.maven.cloud.s3;
 
-import com.amazonaws.regions.Regions;
 
-import java.util.Optional;
+public class PathStyleEnabledProperty {
 
-public class RegionProperty {
-
-    private static final String AWS_DEFAULT_REGION_TAG = "AWS_DEFAULT_REGION";
-    private String region;
+    private static final String PATH_STYLE_PROP = "S3_PATH_STYLE_ENABLED";
+    private String pathStyleEnabled;
 
     /**
      *
-     * @param region may be null
+     * @param pathStyleEnabled may be null
      */
-    public RegionProperty(String region){
+    public PathStyleEnabledProperty(String pathStyleEnabled){
 
-        this.region = region;
+        this.pathStyleEnabled = pathStyleEnabled;
     }
 
     /**
-     * return the region set in the constructor or the region set using the AWS_DEFAULT_REGION system property or the default AWS region (us_west_2)
+     * @return the pathStyle set in the constructor or set using the S3_PATH_STYLE_ENABLED system property or false
      * */
-    public String get() {
-        if (region != null){
-            return region;
+    public boolean get() {
+        if (pathStyleEnabled != null){
+            return Boolean.valueOf(pathStyleEnabled);
         }
-        String regionEnv = System.getProperty("AWS_DEFAULT_REGION");
-        if(regionEnv==null) {
-            return regionEnv;
+        String pathStyleEnv = System.getProperty(PATH_STYLE_PROP);
+        if(pathStyleEnv != null) {
+            return Boolean.valueOf(pathStyleEnv);
         }
-        return Regions.DEFAULT_REGION.getName();
+        return false;
     }
 
 }

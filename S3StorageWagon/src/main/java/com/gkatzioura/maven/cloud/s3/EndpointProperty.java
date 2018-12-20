@@ -16,36 +16,33 @@
 
 package com.gkatzioura.maven.cloud.s3;
 
-import com.amazonaws.regions.Regions;
 
-import java.util.Optional;
+public class EndpointProperty {
 
-public class RegionProperty {
-
-    private static final String AWS_DEFAULT_REGION_TAG = "AWS_DEFAULT_REGION";
-    private String region;
+    private static final String S3_ENDPOINT = "S3_ENDPOINT";
+    private String endpoint;
 
     /**
      *
-     * @param region may be null
+     * @param endpoint may be null
      */
-    public RegionProperty(String region){
+    public EndpointProperty(String endpoint){
 
-        this.region = region;
+        this.endpoint = endpoint;
     }
 
     /**
-     * return the region set in the constructor or the region set using the AWS_DEFAULT_REGION system property or the default AWS region (us_west_2)
+     * @return the endpoint set in the constructor or set using the S3_ENDPOINT system property or null
      * */
     public String get() {
-        if (region != null){
-            return region;
+        if (endpoint != null){
+            return endpoint;
         }
-        String regionEnv = System.getProperty("AWS_DEFAULT_REGION");
-        if(regionEnv==null) {
-            return regionEnv;
+        String endpointEnv = System.getProperty(S3_ENDPOINT);
+        if(endpointEnv != null) {
+            return endpointEnv;
         }
-        return Regions.DEFAULT_REGION.getName();
+        return null;
     }
 
 }
