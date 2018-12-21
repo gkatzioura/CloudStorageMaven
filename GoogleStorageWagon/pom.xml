@@ -3,7 +3,7 @@
     <parent>
         <artifactId>cloud-storage-maven</artifactId>
         <groupId>com.gkatzioura.maven.cloud</groupId>
-        <version>1.6</version>
+        <version>1.6.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -39,6 +39,10 @@
                                 <relocation>
                                     <pattern>com.google</pattern>
                                     <shadedPattern>com.vorstella.shade.com.google</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>com.vorstella.shade.com.fasterxml.jackson</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
