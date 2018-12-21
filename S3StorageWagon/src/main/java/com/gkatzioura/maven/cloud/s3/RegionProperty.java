@@ -42,7 +42,7 @@ public class RegionProperty {
             return region;
         }
         String regionEnv = System.getProperty("AWS_DEFAULT_REGION");
-        if(regionEnv==null) {
+        if(regionEnv != null) {
             return regionEnv;
         }
         return Regions.DEFAULT_REGION.getName();
