@@ -89,3 +89,8 @@ fabric.properties
 
 .idea
 *.iml
+
+# VSCode / Eclipse
+.settings/
+.project
+.classpath
