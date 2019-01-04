@@ -11,7 +11,7 @@
     <description>Google Cloud storage wagon</description>
 
     <properties>
-        <gcs.version>1.20.0</gcs.version>
+        <gcs.version>1.56.0</gcs.version>
     </properties>
 
     <licenses>
