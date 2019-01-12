@@ -57,8 +57,12 @@ public class S3StorageRepository {
 
     private static final Logger LOGGER = Logger.getLogger(S3StorageRepository.class.getName());
 
-    public S3StorageRepository(String bucket, String baseDirectory) {
+    public S3StorageRepository(String bucket) {
+        this.bucket = bucket;
+        this.baseDirectory = "";
+    }
 
+    public S3StorageRepository(String bucket, String baseDirectory) {
         this.bucket = bucket;
         this.baseDirectory = baseDirectory;
     }
