@@ -78,7 +78,7 @@ public class S3UploadMojo extends AbstractMojo {
 
             for(File lFile: files) {
                 if(lFile.isDirectory()) {
-                    List<String> filesFound = findFilesToUpload(filePath);
+                    List<String> filesFound = findFilesToUpload(lFile.getAbsolutePath());
                     totalFiles.addAll(filesFound);
                 } else {
                     totalFiles.add(lFile.getAbsolutePath());
@@ -97,8 +97,18 @@ public class S3UploadMojo extends AbstractMojo {
     }
 
     private String generateKeyName(String fullFilePath) {
+        StringBuilder keyNameBuilder = new StringBuilder();
+
         String absolutePath = new File(path).getAbsolutePath();
-        return key+"/"+fullFilePath.replace(absolutePath,"");
+
+        keyNameBuilder.append(key);
+
+        if(!fullFilePath.startsWith("/")) {
+            keyNameBuilder.append("/");
+        }
+
+        keyNameBuilder.append(fullFilePath.replace(absolutePath,""));
+        return keyNameBuilder.toString();
     }
 
 }
