@@ -4,7 +4,7 @@ import org.junit.Test;
 
 public class S3DownloadMojoTest {
 
-    @Test
+    //@Test
     public void downloadDirectory() throws Exception {
 
         S3UploadMojo s3UploadMojo = new S3UploadMojo();
