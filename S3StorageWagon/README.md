@@ -21,7 +21,7 @@ The S3StorageWagon project enables you to upload your artifacts to a google clou
 Apart from giving a solution to use s3 a maven repository the storage s3-storage-wagon can be used as a plugin in order to
 upload and download items from s3. 
 
-###Upload files
+###### Upload files
 
 ```xml
 <build>
@@ -72,7 +72,7 @@ upload and download items from s3.
     </build>
 ```
 
-###Download files
+###### Download files
 
 ```xml
  <build>
