@@ -15,24 +15,24 @@ public class KeyIteratorConcated implements Iterator<String> {
     @Override
     public boolean hasNext() {
         if(iterators.size()>0) {
-            return iterators.get(0).hasNext();
-        } else {
-            return false;
+            if(!iterators.get(0).hasNext()) {
+                iterators.remove(0);
+                return hasNext();
+            }
+
+            return true;
         }
+
+        return false;
     }
 
     @Override
     public String next() {
-        if(iterators.size()==0) {
+        if(!hasNext()) {
             return null;
         }
 
         Iterator<String> stringIterator = iterators.get(0);
-
-        if(!stringIterator.hasNext()) {
-            iterators.remove(stringIterator);
-            next();
-        }
 
         return stringIterator.next();
     }

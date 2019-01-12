@@ -33,6 +33,8 @@ public class S3DownloadMojo extends AbstractMojo {
     @Parameter(property = "s3-download.downloadPath")
     private String downloadPath;
 
+    private static final String DIRECTORY_CONTENT_TYPE = "application/x-directory";
+
     private static final Logger LOGGER = Logger.getLogger(S3DownloadMojo.class.getName());
 
     public S3DownloadMojo() {
@@ -70,6 +72,10 @@ public class S3DownloadMojo extends AbstractMojo {
 
         S3Object s3Object = amazonS3.getObject(bucket, key);
 
+        if(isDirectory(s3Object)) {
+            return;
+        }
+
         try(S3ObjectInputStream s3ObjectInputStream = s3Object.getObjectContent();
             FileOutputStream fileOutputStream = new FileOutputStream(file)
         ) {
@@ -84,6 +90,10 @@ public class S3DownloadMojo extends AbstractMojo {
 
         String fullPath = downloadPath+"/"+key;
         return fullPath;
+    }
+
+    private final boolean isDirectory(S3Object s3Object) {
+        return s3Object.getObjectMetadata().getContentType().equals(DIRECTORY_CONTENT_TYPE);
     }
 
 
