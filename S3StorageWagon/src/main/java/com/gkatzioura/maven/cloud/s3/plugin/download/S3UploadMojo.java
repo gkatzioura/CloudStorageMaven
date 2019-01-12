@@ -63,7 +63,7 @@ public class S3UploadMojo extends AbstractMojo {
                 amazonS3.putObject(putObjectRequest);
             }
         } else {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,key,new File(path));
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,keyIfNull(),new File(path));
             amazonS3.putObject(putObjectRequest);
         }
    }
@@ -101,14 +101,26 @@ public class S3UploadMojo extends AbstractMojo {
 
         String absolutePath = new File(path).getAbsolutePath();
 
-        keyNameBuilder.append(key);
-
-        if(!fullFilePath.startsWith("/")) {
-            keyNameBuilder.append("/");
+        if(key!=null) {
+            keyNameBuilder.append(key);
+            if(!fullFilePath.startsWith("/")) {
+                keyNameBuilder.append("/");
+            }
+            keyNameBuilder.append(fullFilePath.replace(absolutePath,""));
+        } else {
+            final String clearFilePath = fullFilePath.replace(absolutePath,"");
+            final String filePathToAppend = clearFilePath.startsWith("/")? clearFilePath.replaceFirst("/",""):clearFilePath;
+            keyNameBuilder.append(filePathToAppend);
         }
-
-        keyNameBuilder.append(fullFilePath.replace(absolutePath,""));
         return keyNameBuilder.toString();
+    }
+
+    private String keyIfNull() {
+        if(key==null) {
+            return new File(path).getName();
+        } else {
+            return key;
+        }
     }
 
 }
