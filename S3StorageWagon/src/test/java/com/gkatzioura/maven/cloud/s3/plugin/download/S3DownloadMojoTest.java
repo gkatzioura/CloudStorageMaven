@@ -9,4 +9,8 @@ import org.junit.Test;
 
 public class S3DownloadMojoTest {
 
+    @Test
+    public void testDownloadPrefix() throws Exception {
+    }
+
 }

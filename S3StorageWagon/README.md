@@ -75,7 +75,53 @@ upload and download items from s3.
 ####Download files
 
 ```xml
-
+ <build>
+        <plugins>
+            <plugin>
+                <groupId>com.gkatzioura.maven.cloud</groupId>
+                <artifactId>s3-storage-wagon</artifactId>
+                <version>1.5-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>download-multiple-files-to-one-directory</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>s3-download</goal>
+                        </goals>
+                        <configuration>
+                            <bucket>yourbucketname</bucket>
+                            <downloadPath>/path/to/directory</downloadPath>
+                            <keys>file1.txt,file2.jpg</keys>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-files-and-files-starting-with-prefix</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>s3-download</goal>
+                        </goals>
+                        <configuration>
+                            <bucket>yourbucketname</bucket>
+                            <downloadPath>/path/to/directory</downloadPath>
+                            <keys>prefix,file1.txt,file2.txt</keys>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-single-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>s3-download</goal>
+                        </goals>
+                        <configuration>
+                            <bucket>yourbucketname</bucket>
+                            <downloadPath>/path/to/directory/file.txt</downloadPath>
+                            <keys>file-to-download.txt</keys>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+ </build>   
 ```
 
 Full guide on https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-amazon-s3/
