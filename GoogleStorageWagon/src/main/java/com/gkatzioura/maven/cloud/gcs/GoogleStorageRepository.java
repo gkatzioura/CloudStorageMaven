@@ -126,7 +126,7 @@ public class GoogleStorageRepository {
 
     public boolean exists(String resourceName) {
         final String key = resolveKey(resourceName);
-        Blob blob = storage.get(bucket, resourceName);
+        Blob blob = storage.get(bucket, key);
         return blob.exists();
     }
 
