@@ -26,6 +26,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.SdkClientException;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -67,33 +69,39 @@ public class S3StorageRepository {
         this.baseDirectory = baseDirectory;
     }
 
-    public void connect(AuthenticationInfo authenticationInfo, String region) throws AuthenticationException {
-
+    public void connect(AuthenticationInfo authenticationInfo, RegionProperty region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
+        AmazonS3ClientBuilder builder = null;
         try {
             final Optional<String> regionOpt;
-            if (region != null) {
-                regionOpt = Optional.of(region);
-            } else {
-                regionOpt = new RegionProperty().get();
+
+            builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
+
+            if (endpoint.get() != null){
+                builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), region.get()));
+            }else {
+                builder.withRegion(region.get());
             }
 
-            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
 
-            if(regionOpt.isPresent()) {
-                builder.withRegion(regionOpt.get());
-            }
+            builder.setPathStyleAccessEnabled(pathStyle.get());
 
             amazonS3 = builder.build();
             amazonS3.listBuckets();
 
             LOGGER.log(Level.FINER,String.format("Connected to s3 using bucket %s with base directory %s",bucket,baseDirectory));
 
-        } catch (Exception e) {
-
-            if(e.getMessage().contains("Unable to find a region via the region provider chain")) {
-                throw new AuthenticationException("Please provide a region as a property or an environmmental variable using AWS_DEFAULT_REGION");
+        } catch (SdkClientException e) {
+            if (builder != null){
+                StringBuilder message = new StringBuilder();
+                message.append("Failed to connect");
+                if (builder.getEndpoint() != null){
+                    message.append(" to endpoint ["+ builder.getEndpoint().getServiceEndpoint()+"]");
+                    message.append(" using region [" + builder.getEndpoint().getSigningRegion() + "]");
+                }else {
+                    message.append(" using region [" + builder.getRegion() + "]");
+                }
+                throw new AuthenticationException(message.toString(), e);
             }
-
             throw new AuthenticationException("Could not authenticate",e);
         }
     }
