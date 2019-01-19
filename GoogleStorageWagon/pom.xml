@@ -40,6 +40,10 @@
                                     <pattern>com.google</pattern>
                                     <shadedPattern>com.vorstella.shade.com.google</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>com.vorstella.shade.com.fasterxml.jackson</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
