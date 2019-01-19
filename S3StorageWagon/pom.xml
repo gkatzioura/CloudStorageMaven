@@ -5,7 +5,6 @@
         <groupId>com.gkatzioura.maven.cloud</groupId>
         <version>1.6-SNAPSHOT</version>
     </parent>
-    <version>1.7</version>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>s3-storage-wagon</artifactId>
