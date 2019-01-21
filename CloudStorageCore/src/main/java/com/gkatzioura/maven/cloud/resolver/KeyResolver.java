@@ -29,7 +29,7 @@ public class KeyResolver {
             if(!s.isEmpty() && !s.endsWith("/")) builder.append("/");
         }
 
-        return replaceLast(builder);
+        return builder.length() != 0 ? replaceLast(builder) : "";
     }
 
     private String replaceLast(StringBuilder stringBuilder) {

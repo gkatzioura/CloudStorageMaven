@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public class RegionProperty {
 
-    private static final String AWS_DEFAULT_REGION_TAG = "AWS_DEFAULT_REGION";
+    public static final String AWS_DEFAULT_REGION_TAG = "AWS_DEFAULT_REGION";
     private String region;
 
     /**

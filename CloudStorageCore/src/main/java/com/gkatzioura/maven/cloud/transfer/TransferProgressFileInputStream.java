@@ -24,23 +24,46 @@ import java.io.IOException;
 public final class TransferProgressFileInputStream extends FileInputStream {
 
     private final TransferProgress transferProgress;
+    private long byteLeft;
 
-    public TransferProgressFileInputStream(File file, TransferProgress transferProgress) throws FileNotFoundException {
+
+
+
+    public TransferProgressFileInputStream(File file, TransferProgress transferProgress) throws IOException{
         super(file);
         this.transferProgress = transferProgress;
+        resetByteLeft();
+    }
+
+    private void resetByteLeft() throws IOException {
+        byteLeft = this.getChannel().size();
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        super.reset();
+        resetByteLeft();
     }
 
     @Override
     public int read() throws IOException {
         int b = super.read();
-        this.transferProgress.progress(new byte[]{(byte) b}, 1);
+        if(b != -1){
+            this.transferProgress.progress(new byte[]{(byte) b}, 1);
+            byteLeft--;
+        }//else we try to read but it was the end of the stream so nothing to report
         return b;
     }
 
     @Override
     public int read(byte b[]) throws IOException {
         int count = super.read(b);
-        this.transferProgress.progress(b, b.length);
+        if (count != -1) {
+            this.transferProgress.progress(b, b.length);
+            byteLeft -= b.length;
+        }else{//end of the stream
+            this.transferProgress.progress(b, Math.toIntExact(byteLeft));
+        }
         return count;
     }
 
@@ -48,11 +71,23 @@ public final class TransferProgressFileInputStream extends FileInputStream {
     public int read(byte b[], int off, int len) throws IOException {
         int count = super.read(b, off, len);
         if (off == 0) {
-            this.transferProgress.progress(b, len);
+            if (count != -1) {
+                this.transferProgress.progress(b, count);
+                byteLeft -= count;
+            }else{//end of the stream
+                this.transferProgress.progress(b, Math.toIntExact(byteLeft));
+            }
         } else {
-            byte[] bytes = new byte[len];
-            System.arraycopy(b, off, bytes, 0, len);
-            this.transferProgress.progress(bytes, len);
+            if (count != -1) {
+                byte[] bytes = new byte[count];
+                System.arraycopy(b, off, bytes, 0, count);
+                this.transferProgress.progress(bytes, len);
+                byteLeft -= count;
+            }else{//end of the stream
+                byte[] bytes = new byte[Math.toIntExact(byteLeft)];
+                System.arraycopy(b, off, bytes, 0, Math.toIntExact(byteLeft));
+                this.transferProgress.progress(b, Math.toIntExact(byteLeft));
+            }
         }
         return count;
     }

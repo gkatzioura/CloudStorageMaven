@@ -19,7 +19,7 @@ package com.gkatzioura.maven.cloud.s3;
 
 public class EndpointProperty {
 
-    private static final String S3_ENDPOINT = "S3_ENDPOINT";
+    public static final String S3_ENDPOINT = "S3_ENDPOINT";
     private String endpoint;
 
     /**

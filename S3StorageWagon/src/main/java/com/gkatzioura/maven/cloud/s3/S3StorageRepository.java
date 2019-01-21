@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -28,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -118,7 +120,7 @@ public class S3StorageRepository {
             } catch (AmazonS3Exception e) {
                 throw new ResourceDoesNotExistException("Resource does not exist");
             }
-
+            destination.getParentFile().mkdirs();//make sure the folder exists or the outputStream will fail.
             try(OutputStream outputStream = new TransferProgressFileOutputStream(destination,transferProgress);
                 InputStream inputStream = s3Object.getObjectContent()) {
                 IOUtils.copy(inputStream,outputStream);
@@ -169,23 +171,19 @@ public class S3StorageRepository {
         ObjectListing objectListing = amazonS3.listObjects(new ListObjectsRequest()
                     .withBucketName(bucket)
                     .withPrefix(key));
-
-        return totalObjects(objectListing);
+        List<String> objects = new ArrayList<>();
+        retrieveAllObjects(objectListing, objects);
+        return objects;
     }
 
-    private List<String> totalObjects(ObjectListing objectListing) {
+    private void retrieveAllObjects(ObjectListing objectListing, List<String> objects) {
 
-        List<String> objects = new ArrayList<>();
-
-        objectListing.getObjectSummaries().forEach(os->objects.add(os.getKey()));
+        objectListing.getObjectSummaries().forEach( os-> objects.add(os.getKey()));
 
         if(objectListing.isTruncated()) {
-
             ObjectListing nextObjectListing = amazonS3.listNextBatchOfObjects(objectListing);
-            objects.addAll(totalObjects(nextObjectListing));
+            retrieveAllObjects(nextObjectListing, objects);
         }
-
-        return objects;
     }
 
     public boolean exists(String resourceName) {
@@ -204,8 +202,46 @@ public class S3StorageRepository {
         amazonS3 = null;
     }
 
-    private String resolveKey(String path) {
+    public String resolveKey(String path) {
         return keyResolver.resolve(baseDirectory,path);
     }
 
+    /**
+     * creates the bucket, this is only used for testing purposes hence it is package protected
+     */
+    void createBucket(){
+        if (!exists("")) {
+            amazonS3.createBucket(bucket);
+        }
+    }
+
+    /**
+     * delete the bucket, this is only used for testing hence it is package protected
+     */
+    void deleteBucket() {
+        emptyBucket();
+        amazonS3.deleteBucket(bucket);
+    }
+    /**
+     * delete the bucket, this is only used for testing hence it is package protected
+     */
+    void emptyBucket() {
+        ObjectListing objectListing = amazonS3.listObjects(bucket);
+        while (true) {
+            Iterator<S3ObjectSummary> objIter = objectListing.getObjectSummaries().iterator();
+            while (objIter.hasNext()) {
+                amazonS3.deleteObject(bucket, objIter.next().getKey());
+            }
+
+            // If the bucket contains many objects, the listObjects() call
+            // might not return all of the objects in the first listing. Check to
+            // see whether the listing was truncated. If so, retrieve the next page of objects
+            // and delete them.
+            if (objectListing.isTruncated()) {
+                objectListing = amazonS3.listNextBatchOfObjects(objectListing);
+            } else {
+                break;
+            }
+        }
+    }
 }

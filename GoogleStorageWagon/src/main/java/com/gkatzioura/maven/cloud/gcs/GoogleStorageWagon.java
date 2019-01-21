@@ -51,7 +51,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
 
         Resource resource = new Resource(resourceName);
         transferListenerContainer.fireTransferInitiated(resource, TransferEvent.REQUEST_GET);
-        transferListenerContainer.fireTransferStarted(resource, TransferEvent.REQUEST_GET);
+        transferListenerContainer.fireTransferStarted(resource, TransferEvent.REQUEST_GET, destination);
 
         try {
             googleStorageRepository.copy(resourceName, destination);
@@ -80,7 +80,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
         LOGGER.log(Level.FINER, String.format("Uploading file %s to %s", file.getAbsolutePath(), resourceName));
 
         transferListenerContainer.fireTransferInitiated(resource,TransferEvent.REQUEST_PUT);
-        transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT);
+        transferListenerContainer.fireTransferStarted(resource,TransferEvent.REQUEST_PUT, file);
         final TransferProgress transferProgress = new TransferProgressImpl(resource, TransferEvent.REQUEST_PUT, transferListenerContainer);
 
         try(InputStream inputStream = new TransferProgressFileInputStream(file, transferProgress)) {

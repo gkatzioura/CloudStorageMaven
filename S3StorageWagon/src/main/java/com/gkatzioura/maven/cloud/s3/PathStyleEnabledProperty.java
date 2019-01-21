@@ -19,7 +19,7 @@ package com.gkatzioura.maven.cloud.s3;
 
 public class PathStyleEnabledProperty {
 
-    private static final String PATH_STYLE_PROP = "S3_PATH_STYLE_ENABLED";
+    public static final String PATH_STYLE_PROP = "S3_PATH_STYLE_ENABLED";
     private String pathStyleEnabled;
 
     /**
