@@ -11,7 +11,7 @@
     <packaging>maven-plugin</packaging>
 
     <properties>
-        <aws-s3.version>1.11.418</aws-s3.version>
+        <aws.version>1.11.487</aws.version>
         <httpcore>4.4.10</httpcore>
     </properties>
 
@@ -37,7 +37,12 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>${aws-s3.version}</version>
+            <version>${aws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sts</artifactId>
+            <version>${aws.version}</version>
         </dependency>
         <dependency>
             <groupId>com.gkatzioura.maven.cloud</groupId>
