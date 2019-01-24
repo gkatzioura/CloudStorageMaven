@@ -15,6 +15,7 @@ The S3StorageWagon project enables you to upload your artifacts to a google clou
     </extensions>
 </build>
 ```
+Full guide on [wagon](https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-amazon-s3/)
 
 ## Upload/download files for ci/cd purposes
 
@@ -124,6 +125,6 @@ upload and download items from s3.
  </build>   
 ```
 
-Full guide on https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-amazon-s3/
+Full guide on upload [download](https://egkatzioura.com/2019/01/22/upload-and-download-files-to-s3-using-maven/)
 
 
