@@ -29,14 +29,16 @@ public class KeyResolver {
             if(!s.isEmpty() && !s.endsWith("/")) builder.append("/");
         }
 
-        return builder.length() != 0 ? replaceLast(builder) : "";
+        return replaceLast(builder);
     }
 
     private String replaceLast(StringBuilder stringBuilder) {
+        if(stringBuilder.length() == 0) {
+            return "";
+        }
+
         stringBuilder.replace(stringBuilder.lastIndexOf("/"), stringBuilder.lastIndexOf("/") + 1, "" );
         return stringBuilder.toString();
     }
-
-
 
 }
