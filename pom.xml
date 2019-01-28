@@ -5,8 +5,8 @@
     <groupId>com.gkatzioura.maven.cloud</groupId>
     <artifactId>cloud-storage-maven</artifactId>
     <packaging>pom</packaging>
-    <version>1.7-SNAPSHOT</version>
-
+    <version>1.7</version>
+  
     <name>Cloud Storage</name>
     <description>The CloudStorage project enables you to use the storage options of cloud provides (Google Cloud) storage as maven repositories.</description>
     <url>https://github.com/gkatzioura/CloudStorage</url>

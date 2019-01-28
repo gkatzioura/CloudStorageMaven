@@ -17,6 +17,7 @@
 package com.gkatzioura.maven.cloud.abs;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,8 +82,7 @@ public class AzureStorageWagon extends AbstractStorageWagon {
 
     @Override
     public void put(File file, String resourceName) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-
-        resourceName = FilenameUtils.normalize(resourceName, true);
+        resourceName = Paths.get(resourceName).normalize().toString();
         Resource resource = new Resource(resourceName);
 
         LOGGER.log(Level.FINER, String.format("Uploading file %s to %s", file.getAbsolutePath(), resourceName));
