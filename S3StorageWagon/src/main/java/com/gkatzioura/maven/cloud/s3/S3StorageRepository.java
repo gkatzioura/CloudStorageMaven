@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -28,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -52,7 +54,6 @@ public class S3StorageRepository {
     private final String bucket;
     private final String baseDirectory;
 
-    private final CredentialsFactory credentialsFactory = new CredentialsFactory();
     private final KeyResolver keyResolver = new KeyResolver();
 
     private AmazonS3 amazonS3;
@@ -74,16 +75,7 @@ public class S3StorageRepository {
         try {
             final Optional<String> regionOpt;
 
-            builder = AmazonS3ClientBuilder.standard().withCredentials(credentialsFactory.create(authenticationInfo));
-
-            if (endpoint.get() != null){
-                builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), region.get()));
-            }else {
-                builder.withRegion(region.get());
-            }
-
-
-            builder.setPathStyleAccessEnabled(pathStyle.get());
+            builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle);
 
             amazonS3 = builder.build();
             amazonS3.listBuckets();
@@ -106,6 +98,21 @@ public class S3StorageRepository {
         }
     }
 
+    public static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, RegionProperty region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) {
+        AmazonS3ClientBuilder builder;
+        builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo));
+
+        if (endpoint.get() != null){
+            builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), region.get()));
+        }else {
+            builder.withRegion(region.get());
+        }
+
+
+        builder.setPathStyleAccessEnabled(pathStyle.get());
+        return builder;
+    }
+
     public void copy(String resourceName, File destination, TransferProgress transferProgress) throws TransferFailedException, ResourceDoesNotExistException {
 
         final String key = resolveKey(resourceName);
@@ -118,7 +125,7 @@ public class S3StorageRepository {
             } catch (AmazonS3Exception e) {
                 throw new ResourceDoesNotExistException("Resource does not exist");
             }
-
+            destination.getParentFile().mkdirs();//make sure the folder exists or the outputStream will fail.
             try(OutputStream outputStream = new TransferProgressFileOutputStream(destination,transferProgress);
                 InputStream inputStream = s3Object.getObjectContent()) {
                 IOUtils.copy(inputStream,outputStream);
@@ -169,23 +176,19 @@ public class S3StorageRepository {
         ObjectListing objectListing = amazonS3.listObjects(new ListObjectsRequest()
                     .withBucketName(bucket)
                     .withPrefix(key));
-
-        return totalObjects(objectListing);
+        List<String> objects = new ArrayList<>();
+        retrieveAllObjects(objectListing, objects);
+        return objects;
     }
 
-    private List<String> totalObjects(ObjectListing objectListing) {
+    private void retrieveAllObjects(ObjectListing objectListing, List<String> objects) {
 
-        List<String> objects = new ArrayList<>();
-
-        objectListing.getObjectSummaries().forEach(os->objects.add(os.getKey()));
+        objectListing.getObjectSummaries().forEach( os-> objects.add(os.getKey()));
 
         if(objectListing.isTruncated()) {
-
             ObjectListing nextObjectListing = amazonS3.listNextBatchOfObjects(objectListing);
-            objects.addAll(totalObjects(nextObjectListing));
+            retrieveAllObjects(nextObjectListing, objects);
         }
-
-        return objects;
     }
 
     public boolean exists(String resourceName) {
@@ -207,5 +210,14 @@ public class S3StorageRepository {
     private String resolveKey(String path) {
         return keyResolver.resolve(baseDirectory,path);
     }
+
+    public String getBucket() {
+        return bucket;
+    }
+
+    public String getBaseDirectory() {
+        return baseDirectory;
+    }
+
 
 }

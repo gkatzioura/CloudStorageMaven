@@ -33,10 +33,12 @@ public class KeyResolver {
     }
 
     private String replaceLast(StringBuilder stringBuilder) {
+        if(stringBuilder.length() == 0) {
+            return "";
+        }
+
         stringBuilder.replace(stringBuilder.lastIndexOf("/"), stringBuilder.lastIndexOf("/") + 1, "" );
         return stringBuilder.toString();
     }
-
-
 
 }

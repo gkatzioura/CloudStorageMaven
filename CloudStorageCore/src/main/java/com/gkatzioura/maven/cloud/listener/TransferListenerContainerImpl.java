@@ -16,6 +16,7 @@
 
 package com.gkatzioura.maven.cloud.listener;
 
+import java.io.File;
 import java.util.Vector;
 
 import org.apache.maven.wagon.Wagon;
@@ -60,8 +61,11 @@ public class TransferListenerContainerImpl implements TransferListenerContainer 
     }
 
     @Override
-    public void fireTransferStarted(Resource resource, int requestType) {
+    public void fireTransferStarted(Resource resource, int requestType, File localFile) {
+        resource.setContentLength(localFile.length());
+        resource.setLastModified(localFile.lastModified());
         TransferEvent transferEvent = new TransferEvent(this.wagon,resource,TransferEvent.TRANSFER_STARTED,requestType);
+        transferEvent.setLocalFile(localFile);
         transferListeners.forEach(tl->tl.transferStarted(transferEvent));
     }
 

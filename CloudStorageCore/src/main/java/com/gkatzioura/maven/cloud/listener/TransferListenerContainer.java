@@ -19,6 +19,8 @@ package com.gkatzioura.maven.cloud.listener;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.resource.Resource;
 
+import java.io.File;
+
 public interface TransferListenerContainer {
 
     /**
@@ -59,9 +61,10 @@ public interface TransferListenerContainer {
      *
      * @param resource    The resource being transfered
      * @param requestType The type of request being executed
+     * @param localFile local file used
      * @see org.apache.maven.wagon.events.TransferEvent#TRANSFER_STARTED
      */
-    void fireTransferStarted(Resource resource, int requestType);
+    void fireTransferStarted(Resource resource, int requestType, File localFile);
 
     /**
      * Notify {@link TransferListener}s about the progress of a transfer
