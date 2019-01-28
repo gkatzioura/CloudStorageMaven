@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.gkatzioura.maven.cloud.resolver.KeyResolver;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.PathUtils;
@@ -49,7 +50,9 @@ import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
 public class S3StorageWagon extends AbstractStorageWagon {
 
     private S3StorageRepository s3StorageRepository;
-    
+    private final KeyResolver keyResolver = new KeyResolver();
+
+
     private String region;
 
     private static final Logger LOGGER = Logger.getLogger(S3StorageWagon.class.getName());
@@ -142,7 +145,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
     //removes the prefix path
     //adds folders files
     private List<String> convertS3ListToMavenFileList(List<String> list, String path) {
-        String prefix = s3StorageRepository.resolveKey(path);
+        String prefix = keyResolver.resolve( s3StorageRepository.getBaseDirectory(), path);
         Set<String> folders = new HashSet<>();
         List<String> result = list.stream().map( key -> {
             String filePath = key;

@@ -1,5 +1,10 @@
 package com.gkatzioura.maven.cloud.s3;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.WagonTestCase;
@@ -10,6 +15,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 /***
@@ -17,6 +23,7 @@ import java.util.List;
  * */
 public class S3StorageWagonTest extends WagonTestCase {
 
+    AmazonS3 amazonS3;
 
     @Override
     protected AuthenticationInfo getAuthInfo() {
@@ -53,31 +60,71 @@ public class S3StorageWagonTest extends WagonTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         //creates the bucket
-        S3StorageRepository s3StorageRepository = new S3StorageRepository(getTestBucket(), "");
-        s3StorageRepository.connect(getAuthInfo(), new RegionProperty(null), new EndpointProperty(null), new PathStyleEnabledProperty(null));
-        try {
-            s3StorageRepository.createBucket();
-        }finally {
-            s3StorageRepository.disconnect();
-        }
+        AmazonS3ClientBuilder amazonS3ClientBuilder = S3StorageRepository.createAmazonS3ClientBuilder(getAuthInfo(), new RegionProperty(null), new EndpointProperty(null), new PathStyleEnabledProperty(null));
+        amazonS3 = amazonS3ClientBuilder.build();
+        createBucket();
     }
 
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        //empty the bucket
-        S3StorageRepository s3StorageRepository = new S3StorageRepository(getTestBucket(), "");
-        s3StorageRepository.connect(getAuthInfo(), new RegionProperty(null), new EndpointProperty(null), new PathStyleEnabledProperty(null));
-        try {
-            s3StorageRepository.emptyBucket();
-        }finally {
-            s3StorageRepository.disconnect();
-        }
+        emptyBucket();
     }
 
     private String getTestBucket() {
         return System.getProperty("s3.test.bucket.name", "s3wagontestbucket");
+    }
+
+
+
+    /**
+     * creates the bucket, this is only used for testing purposes hence it is package protected
+     */
+    void createBucket(){
+        if (!bucketExists(getTestBucket())) {
+            amazonS3.createBucket(getTestBucket());
+        }
+    }
+
+    boolean bucketExists(String bucket){
+        try {
+            amazonS3.getObjectMetadata(bucket, "");
+            return true;
+        } catch (AmazonS3Exception e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * delete the bucket, this is only used for testing hence it is package protected
+     */
+    void deleteBucket() {
+        emptyBucket();
+        amazonS3.deleteBucket(getTestBucket());
+    }
+    /**
+     * delete the bucket, this is only used for testing hence it is package protected
+     */
+    void emptyBucket() {
+        ObjectListing objectListing = amazonS3.listObjects(getTestBucket());
+        while (true) {
+            Iterator<S3ObjectSummary> objIter = objectListing.getObjectSummaries().iterator();
+            while (objIter.hasNext()) {
+                amazonS3.deleteObject(getTestBucket(), objIter.next().getKey());
+            }
+
+            // If the bucket contains many objects, the listObjects() call
+            // might not return all of the objects in the first listing. Check to
+            // see whether the listing was truncated. If so, retrieve the next page of objects
+            // and delete them.
+            if (objectListing.isTruncated()) {
+                objectListing = amazonS3.listNextBatchOfObjects(objectListing);
+            } else {
+                break;
+            }
+        }
     }
 
 
