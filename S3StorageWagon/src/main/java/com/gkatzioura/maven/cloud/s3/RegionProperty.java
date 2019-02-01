@@ -30,7 +30,6 @@ public class RegionProperty {
      * @param region may be null
      */
     public RegionProperty(String region){
-
         this.region = region;
     }
 
