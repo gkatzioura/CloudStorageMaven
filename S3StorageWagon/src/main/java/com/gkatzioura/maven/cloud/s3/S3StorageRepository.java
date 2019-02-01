@@ -21,15 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -57,6 +54,7 @@ public class S3StorageRepository {
     private final KeyResolver keyResolver = new KeyResolver();
 
     private AmazonS3 amazonS3;
+    private PublicReadProperty publicReadProperty;
 
     private static final Logger LOGGER = Logger.getLogger(S3StorageRepository.class.getName());
 
@@ -70,11 +68,16 @@ public class S3StorageRepository {
         this.baseDirectory = baseDirectory;
     }
 
+    public S3StorageRepository(String bucket, String baseDirectory, PublicReadProperty publicReadProperty) {
+        this.bucket = bucket;
+        this.baseDirectory = baseDirectory;
+        this.publicReadProperty = publicReadProperty;
+    }
+
+
     public void connect(AuthenticationInfo authenticationInfo, RegionProperty region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
         AmazonS3ClientBuilder builder = null;
         try {
-            final Optional<String> regionOpt;
-
             builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle);
 
             amazonS3 = builder.build();

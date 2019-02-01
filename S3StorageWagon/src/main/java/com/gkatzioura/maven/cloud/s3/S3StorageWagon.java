@@ -54,6 +54,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
 
 
     private String region;
+    private Boolean publicRepository;
 
     private static final Logger LOGGER = Logger.getLogger(S3StorageWagon.class.getName());
     private String endpoint;
@@ -182,7 +183,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
         final String directory = containerResolver.resolve(repository);
 
         LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
-        s3StorageRepository = new S3StorageRepository(bucket,directory);
+        s3StorageRepository = new S3StorageRepository(bucket, directory, new PublicReadProperty(publicRepository));
         s3StorageRepository.connect(authenticationInfo, new RegionProperty(region), new EndpointProperty(endpoint), new PathStyleEnabledProperty(pathStyleEnabled));
 
         sessionListenerContainer.fireSessionLoggedIn();
@@ -204,6 +205,14 @@ public class S3StorageWagon extends AbstractStorageWagon {
 	public void setRegion(String region) {
 		this.region = region;
 	}
+
+    public Boolean getPublicRepository() {
+        return publicRepository;
+    }
+
+    public void setPublicRepository(Boolean publicRepository) {
+        this.publicRepository = publicRepository;
+    }
 
     public String getEndpoint() {
         return endpoint;
