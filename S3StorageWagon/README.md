@@ -17,6 +17,47 @@ The S3StorageWagon project enables you to upload your artifacts to a google clou
 ```
 Full guide on [wagon](https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-amazon-s3/)
 
+### Public repos
+
+You can specify your artifacts to be public and thus getting downloaded without the need for authorised access to your bucket.
+
+To specify a repo as public you can do it through the settings.xml
+
+```xml
+<server>
+  <id>bucket-repo</id>
+  <username>access_key</username>
+  <password>access_secret</password>
+  <configuration>
+    <region>eu-west-1</region>
+    <publicRepository>true</publicRepository>
+  </configuration>
+</server>
+``` 
+
+You can also use system properties with the mvn command
+
+```bash
+mvn deploy -DpublicRepository=true
+```
+
+Or through environmental variables
+
+```bash
+PUBLIC_REPOSITORY=true mvn deploy
+```
+
+Then you can use the artifact without any authorised access
+
+```bash
+    <repositories>
+        <repository>
+            <id>bucket-repo</id>
+            <url>https://s3-eu-west-1.amazonaws.com/whatever/snapshot</url>
+        </repository>
+    </repositories>
+```
+
 ## Upload/download files for ci/cd purposes
 
 Apart from giving a solution to use s3 a maven repository the storage s3-storage-wagon can be used as a plugin in order to
