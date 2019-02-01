@@ -18,7 +18,8 @@ package com.gkatzioura.maven.cloud.s3;
 
 public class PublicReadProperty {
 
-    private static final String PUBLIC_REPOSITORY_TAG = "PUBLIC_REPOSITORY";
+    private static final String PUBLIC_REPOSITORY_PROP_TAG = "publicRepository";
+    private static final String PUBLIC_REPOSITORY_ENV_TAG = "PUBLIC_REPOSITORY";
 
     private Boolean publicRepository;
 
@@ -38,12 +39,12 @@ public class PublicReadProperty {
             return publicRepository;
         }
 
-        String publicRepositoryProp = System.getProperty(PUBLIC_REPOSITORY_TAG);
+        String publicRepositoryProp = System.getProperty(PUBLIC_REPOSITORY_PROP_TAG);
         if(publicRepositoryProp != null) {
             return Boolean.valueOf(publicRepositoryProp);
         }
 
-        String publicRepositoryEnv = System.getProperty(PUBLIC_REPOSITORY_TAG);
+        String publicRepositoryEnv = System.getenv(PUBLIC_REPOSITORY_ENV_TAG);
         if(publicRepositoryEnv!= null) {
             return Boolean.valueOf(publicRepositoryEnv);
         }

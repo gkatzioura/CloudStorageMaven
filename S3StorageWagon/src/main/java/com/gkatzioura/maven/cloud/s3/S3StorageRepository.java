@@ -195,7 +195,7 @@ public class S3StorageRepository {
     }
 
     private void applyPublicRead(PutObjectRequest putObjectRequest) {
-        if(publicReadProperty!=null && publicReadProperty.get()) {
+        if(publicReadProperty.get()) {
             LOGGER.info("Public read was set to true");
             putObjectRequest.withCannedAcl(CannedAccessControlList.PublicRead);
         }
