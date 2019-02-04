@@ -8,7 +8,7 @@ The AzureStorageWagon project enables you to upload your artifacts to a google c
         <extension>
             <groupId>com.gkatzioura.maven.cloud</groupId>
             <artifactId>azure-storage-wagon</artifactId>
-            <version>1.2</version>
+            <version>1.8</version>
         </extension>
     </extensions>
 </build>
