@@ -10,7 +10,7 @@ The S3StorageWagon project enables you to upload your artifacts to a google clou
         <extension>
             <groupId>com.gkatzioura.maven.cloud</groupId>
             <artifactId>s3-storage-wagon</artifactId>
-            <version>1.2</version>
+            <version>1.8</version>
         </extension>
     </extensions>
 </build>
