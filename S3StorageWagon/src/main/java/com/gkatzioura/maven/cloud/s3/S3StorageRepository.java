@@ -90,7 +90,7 @@ public class S3StorageRepository {
             builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle);
 
             amazonS3 = builder.build();
-            amazonS3.listBuckets();
+            //amazonS3.listBuckets();
 
             LOGGER.log(Level.FINER,String.format("Connected to s3 using bucket %s with base directory %s",bucket,baseDirectory));
 
