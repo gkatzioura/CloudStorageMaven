@@ -13,6 +13,7 @@
     <properties>
         <aws.version>1.11.487</aws.version>
         <httpcore>4.4.10</httpcore>
+        <powermock.version>1.7.1</powermock.version>
     </properties>
 
     <licenses>
@@ -69,6 +70,18 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

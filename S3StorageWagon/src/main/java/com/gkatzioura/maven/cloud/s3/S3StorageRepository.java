@@ -111,12 +111,10 @@ public class S3StorageRepository {
     }
 
     public static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) {
+        final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain(region);
         AmazonS3ClientBuilder builder;
         builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo));
-
-        if (region != null) {
-            builder.setRegion(region);
-        }
+        builder.setRegion(regionProvider.getRegion());
 
         if (endpoint.get() != null){
             builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), builder.getRegion()));
