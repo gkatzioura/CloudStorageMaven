@@ -60,7 +60,7 @@ public class S3StorageWagonTest extends WagonTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         //creates the bucket
-        AmazonS3ClientBuilder amazonS3ClientBuilder = S3StorageRepository.createAmazonS3ClientBuilder(getAuthInfo(), new RegionProperty(null), new EndpointProperty(null), new PathStyleEnabledProperty(null));
+        AmazonS3ClientBuilder amazonS3ClientBuilder = S3StorageRepository.createAmazonS3ClientBuilder(getAuthInfo(), null, new EndpointProperty(null), new PathStyleEnabledProperty(null));
         amazonS3 = amazonS3ClientBuilder.build();
         createBucket();
     }
