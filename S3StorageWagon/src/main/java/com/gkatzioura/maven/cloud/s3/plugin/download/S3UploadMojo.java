@@ -82,9 +82,9 @@ public class S3UploadMojo extends AbstractMojo {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,keyIfNull(),new File(path));
             amazonS3.putObject(putObjectRequest);
         }
-   }
+    }
 
-   private List<String> findFilesToUpload(String filePath) {
+    private List<String> findFilesToUpload(String filePath) {
         List<String> totalFiles = new ArrayList<>();
 
         File file = new File(filePath);
@@ -106,7 +106,7 @@ public class S3UploadMojo extends AbstractMojo {
         }
 
         return totalFiles;
-   }
+    }
 
     private boolean isDirectory() {
         return new File(path).isDirectory();
