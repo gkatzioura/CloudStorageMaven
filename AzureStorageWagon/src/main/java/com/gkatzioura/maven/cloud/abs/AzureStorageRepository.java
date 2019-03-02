@@ -46,18 +46,14 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class AzureStorageRepository {
 
-    private final String storageAccount;
     private final String container;
-
     private final ConnectionStringFactory connectionStringFactory;
-
     private CloudBlobContainer blobContainer;
 
     private static final Logger LOGGER = Logger.getLogger(AzureStorageRepository.class.getName());
 
-    public AzureStorageRepository(String storageAccount, String directory) {
+    public AzureStorageRepository(String directory) {
         this.connectionStringFactory = new ConnectionStringFactory();
-        this.storageAccount = storageAccount;
         this.container = directory;
     }
 

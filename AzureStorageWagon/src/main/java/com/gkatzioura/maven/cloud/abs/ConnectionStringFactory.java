@@ -36,4 +36,20 @@ public class ConnectionStringFactory {
         return String.format(CONNECTION_STRING_TEMPLATE,authenticationInfo.getUserName(),authenticationInfo.getPassword());
     }
 
+    /**
+     * This shall create the connection string based on the environmental params
+     * @return
+     * @throws AuthenticationException
+     */
+    public String create() throws AuthenticationException {
+        String accountName = System.getenv("ACCOUNT_NAME");
+        String accountKey = System.getenv("ACCOUNT_KEY");
+
+        if(accountName ==null || accountKey == null) {
+            throw new AuthenticationException("Please provide storage account credentials using environmental variables");
+        }
+
+        return String.format(CONNECTION_STRING_TEMPLATE,accountName,accountKey);
+    }
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.s3.plugin.download;
+package com.gkatzioura.maven.cloud;
 
 import java.util.Iterator;
 import java.util.List;
