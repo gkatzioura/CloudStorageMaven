@@ -148,7 +148,7 @@ public class AzureStorageWagon extends AbstractStorageWagon {
 
             LOGGER.log(Level.FINER,String.format("Opening connection for account %s and container %s",account,container));
 
-            azureStorageRepository = new AzureStorageRepository(account,container);
+            azureStorageRepository = new AzureStorageRepository(container);
             azureStorageRepository.connect(authenticationInfo);
             sessionListenerContainer.fireSessionLoggedIn();
             sessionListenerContainer.fireSessionOpened();

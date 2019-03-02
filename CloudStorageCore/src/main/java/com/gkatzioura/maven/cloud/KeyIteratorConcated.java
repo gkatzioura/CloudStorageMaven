@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.s3.plugin.download;
+package com.gkatzioura.maven.cloud;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class KeyIteratorConcated implements Iterator<String> {
+public class KeyIteratorConcated<T> implements Iterator<T> {
 
-    private final List<Iterator<String>> iterators;
+    private final List<Iterator<T>> iterators;
 
-    public KeyIteratorConcated(List<Iterator<String>> iterators) {
+    public KeyIteratorConcated(List<Iterator<T>> iterators) {
         this.iterators = iterators;
     }
 
@@ -43,12 +43,12 @@ public class KeyIteratorConcated implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public T next() {
         if(!hasNext()) {
             return null;
         }
 
-        Iterator<String> stringIterator = iterators.get(0);
+        Iterator<T> stringIterator = iterators.get(0);
 
         return stringIterator.next();
     }
@@ -59,7 +59,7 @@ public class KeyIteratorConcated implements Iterator<String> {
     }
 
     @Override
-    public void forEachRemaining(Consumer<? super String> action) {
+    public void forEachRemaining(Consumer<? super T> action) {
         throw new UnsupportedOperationException();
     }
 }

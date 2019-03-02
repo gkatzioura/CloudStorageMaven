@@ -44,20 +44,18 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
+import static com.gkatzioura.maven.cloud.abs.ContentTypeResolver.getContentType;
+
 public class AzureStorageRepository {
 
-    private final String storageAccount;
     private final String container;
-
     private final ConnectionStringFactory connectionStringFactory;
-
     private CloudBlobContainer blobContainer;
 
     private static final Logger LOGGER = Logger.getLogger(AzureStorageRepository.class.getName());
 
-    public AzureStorageRepository(String storageAccount, String directory) {
+    public AzureStorageRepository(String directory) {
         this.connectionStringFactory = new ConnectionStringFactory();
-        this.storageAccount = storageAccount;
         this.container = directory;
     }
 
@@ -116,7 +114,6 @@ public class AzureStorageRepository {
     public void put(File file, String destination,TransferProgress transferProgress) throws TransferFailedException {
 
         LOGGER.log(Level.FINER,String.format("Uploading key %s ",destination));
-
         try {
 
             CloudBlockBlob blob = blobContainer.getBlockBlobReference(destination);
@@ -131,28 +128,6 @@ public class AzureStorageRepository {
         }
     }
 
-    private String getContentType(File file) {
-        String name = file.getName().toLowerCase();
-        if (name.endsWith(".txt")) {
-            return "text/plain";
-        } else if (name.endsWith(".js")) {
-            return "text/javascript";
-        } else if (name.endsWith(".css")) {
-            return "text/css";
-        } else if (name.endsWith(".htm") || name.endsWith(".html")) {
-            return "text/html";
-        } else if (name.endsWith(".json")) {
-            return "application/json";
-        } else if (name.endsWith(".jpg") || name.endsWith(".jpeg")) {
-            return "image/jpeg";
-        } else if (name.endsWith(".png")) {
-            return "image/png";
-        } else if (name.endsWith(".gif")) {
-            return "image/gif";
-        } else {
-            return "application/octet-stream";
-        }
-    }
 
     public boolean exists(String resourceName) throws TransferFailedException {
 

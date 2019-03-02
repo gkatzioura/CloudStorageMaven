@@ -36,6 +36,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.gkatzioura.maven.cloud.KeyIteratorConcated;
 
 @Mojo(name = "s3-download")
 public class S3DownloadMojo extends AbstractMojo {
