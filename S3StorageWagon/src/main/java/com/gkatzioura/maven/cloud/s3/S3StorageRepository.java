@@ -154,7 +154,9 @@ public class S3StorageRepository {
 
         try {
             try(InputStream inputStream = new TransferProgressFileInputStream(file,transferProgress)) {
-                PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,key,inputStream,new ObjectMetadata());
+                ObjectMetadata objectMetadata = new ObjectMetadata();
+                objectMetadata.setContentLength(file.length());
+                PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,key,inputStream,objectMetadata);
                 applyPublicRead(putObjectRequest);
                 amazonS3.putObject(putObjectRequest);
             }
