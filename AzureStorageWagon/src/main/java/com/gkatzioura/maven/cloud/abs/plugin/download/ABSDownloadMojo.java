@@ -27,13 +27,14 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.BlobInputStream;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import com.microsoft.azure.storage.blob.ListBlobItem;
 
 @Mojo(name = "abs-download")
 public class ABSDownloadMojo extends AbstractMojo {
 
     private CloudStorageAccount cloudStorageAccount;
 
-    @Parameter(property = "abs-container")
+    @Parameter(property = "abs-download.container")
     private String container;
 
     @Parameter(property = "abs-download.keys")
@@ -44,10 +45,17 @@ public class ABSDownloadMojo extends AbstractMojo {
 
     private static final Logger LOGGER = Logger.getLogger(ABSDownloadMojo.class.getName());
 
+    public ABSDownloadMojo(String container, List<String> keys, String downloadPath) throws AuthenticationException {
+        this();
+        this.container = container;
+        this.keys = keys;
+        this.downloadPath = downloadPath;
+    }
+
     public ABSDownloadMojo() throws AuthenticationException {
         try {
             String connectionString = new ConnectionStringFactory().create();
-            CloudStorageAccount cloudStorageAccount = CloudStorageAccount.parse(connectionString);
+            cloudStorageAccount = CloudStorageAccount.parse(connectionString);
         } catch (Exception e) {
             throw new AuthenticationException("Could not setup azure client",e);
         }
@@ -64,18 +72,18 @@ public class ABSDownloadMojo extends AbstractMojo {
                 return;
             }
 
-            List<Iterator<String>> prefixKeysIterators = keys.stream()
-                                                             .map(pi -> new PrefixKeysIterator(blobContainer, pi))
-                                                             .collect(Collectors.toList());
-            Iterator<String> keyIteratorConcated = new KeyIteratorConcated(prefixKeysIterators);
+            List<Iterator<ListBlobItem>> prefixKeysIterators = keys.stream()
+                                                                   .map(pi -> new PrefixKeysIterator(blobContainer, pi))
+                                                                   .collect(Collectors.toList());
+            Iterator<ListBlobItem> keyIteratorConcatenated = new KeyIteratorConcated<ListBlobItem>(prefixKeysIterators);
 
-            while (keyIteratorConcated.hasNext()) {
-
-                String key = keyIteratorConcated.next();
+            while (keyIteratorConcatenated.hasNext()) {
+                ListBlobItem key = keyIteratorConcatenated.next();
                 downloadFile(blobContainer,key);
             }
-        } catch (Exception e) {
-            throw new MojoFailureException("Could not get container",e);
+
+        } catch (StorageException |URISyntaxException e) {
+            throw new MojoFailureException("Could not get container "+container,e);
         }
     }
 
@@ -107,7 +115,8 @@ public class ABSDownloadMojo extends AbstractMojo {
         }
     }
 
-    private void downloadFile(CloudBlobContainer cloudBlobContainer,String key) throws MojoExecutionException {
+    private void downloadFile(CloudBlobContainer cloudBlobContainer,ListBlobItem listBlobItem) throws MojoExecutionException {
+        String key = listBlobItem.getUri().getPath().replace("/"+container+"/","");
         File file = new File(createFullFilePath(key));
 
         if(file.getParent()!=null) {

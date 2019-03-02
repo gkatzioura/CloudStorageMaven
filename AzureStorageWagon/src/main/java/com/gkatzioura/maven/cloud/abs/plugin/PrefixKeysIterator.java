@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
-public class PrefixKeysIterator implements Iterator<String> {
+public class PrefixKeysIterator implements Iterator<ListBlobItem> {
 
     private final CloudBlobContainer cloudBlobContainer;
     private final String prefix;
@@ -16,7 +16,7 @@ public class PrefixKeysIterator implements Iterator<String> {
     public PrefixKeysIterator(final CloudBlobContainer cloudBlobContainer, final String prefix) {
         this.cloudBlobContainer = cloudBlobContainer;
         this.prefix = prefix;
-        tempListing = cloudBlobContainer.listBlobs(prefix).iterator();
+        tempListing = cloudBlobContainer.listBlobs(prefix,true).iterator();
     }
 
     @Override
@@ -25,8 +25,8 @@ public class PrefixKeysIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
-        return tempListing.next().getUri().toString();
+    public ListBlobItem next() {
+        return tempListing.next();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class PrefixKeysIterator implements Iterator<String> {
     }
 
     @Override
-    public void forEachRemaining(Consumer<? super String> action) {
+    public void forEachRemaining(Consumer<? super ListBlobItem> action) {
         throw new UnsupportedOperationException();
     }
 }
