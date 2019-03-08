@@ -37,6 +37,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.gkatzioura.maven.cloud.KeyIteratorConcated;
+import com.gkatzioura.maven.cloud.s3.plugin.PrefixKeysIterator;
 
 @Mojo(name = "s3-download")
 public class S3DownloadMojo extends AbstractMojo {
@@ -73,7 +74,7 @@ public class S3DownloadMojo extends AbstractMojo {
         }
 
         List<Iterator<String>> prefixKeysIterators = keys.stream()
-                                                 .map(pi -> new PrefixKeysIterator(amazonS3,bucket,pi))
+                                                 .map(pi -> new PrefixKeysIterator(amazonS3, bucket, pi))
                                                  .collect(Collectors.toList());
         Iterator<String> keyIteratorConcated = new KeyIteratorConcated(prefixKeysIterators);
 

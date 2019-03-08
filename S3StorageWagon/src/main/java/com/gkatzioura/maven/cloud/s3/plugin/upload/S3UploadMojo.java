@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.s3.plugin.download;
+package com.gkatzioura.maven.cloud.s3.plugin.upload;
 
 import java.io.File;
 import java.io.FileInputStream;
