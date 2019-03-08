@@ -84,7 +84,7 @@ public class S3StorageRepository {
     }
 
 
-    public void connect(AuthenticationInfo authenticationInfo, RegionProperty region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
+    public void connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
         AmazonS3ClientBuilder builder = null;
         try {
             builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle);
@@ -109,16 +109,15 @@ public class S3StorageRepository {
         }
     }
 
-    public static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, RegionProperty region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) {
+    public static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) {
+        final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain(region);
         AmazonS3ClientBuilder builder;
         builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo));
+        builder.setRegion(regionProvider.getRegion());
 
         if (endpoint.get() != null){
-            builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), region.get()));
-        }else {
-            builder.withRegion(region.get());
+            builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), builder.getRegion()));
         }
-
 
         builder.setPathStyleAccessEnabled(pathStyle.get());
         return builder;

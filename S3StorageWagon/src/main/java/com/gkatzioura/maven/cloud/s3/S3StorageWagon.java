@@ -184,7 +184,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
 
         LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
         s3StorageRepository = new S3StorageRepository(bucket, directory, new PublicReadProperty(publicRepository));
-        s3StorageRepository.connect(authenticationInfo, new RegionProperty(region), new EndpointProperty(endpoint), new PathStyleEnabledProperty(pathStyleEnabled));
+        s3StorageRepository.connect(authenticationInfo, region, new EndpointProperty(endpoint), new PathStyleEnabledProperty(pathStyleEnabled));
 
         sessionListenerContainer.fireSessionLoggedIn();
         sessionListenerContainer.fireSessionOpened();
