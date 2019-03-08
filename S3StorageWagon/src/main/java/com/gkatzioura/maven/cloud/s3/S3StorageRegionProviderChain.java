@@ -1,12 +1,18 @@
 package com.gkatzioura.maven.cloud.s3;
 
 import com.amazonaws.SdkClientException;
+import com.amazonaws.regions.AwsEnvVarOverrideRegionProvider;
+import com.amazonaws.regions.AwsProfileRegionProvider;
+import com.amazonaws.regions.AwsRegionProvider;
+import com.amazonaws.regions.AwsRegionProviderChain;
+import com.amazonaws.regions.AwsSystemPropertyRegionProvider;
 import com.amazonaws.regions.DefaultAwsRegionProviderChain;
+import com.amazonaws.regions.InstanceMetadataRegionProvider;
 
 /**
  *
  */
-public class S3StorageRegionProviderChain extends DefaultAwsRegionProviderChain {
+public class S3StorageRegionProviderChain extends AwsRegionProviderChain {
 
     private String providedRegion;
 
@@ -24,7 +30,12 @@ public class S3StorageRegionProviderChain extends DefaultAwsRegionProviderChain 
      * @param providedRegion Specific region to
      */
     public S3StorageRegionProviderChain(final String providedRegion) {
-        super();
+        super(new AwsRegionProvider[]{
+                new AwsDefaultEnvRegionProvider(),
+                new AwsEnvVarOverrideRegionProvider(),
+                new AwsSystemPropertyRegionProvider(),
+                new AwsProfileRegionProvider(),
+                new InstanceMetadataRegionProvider()});
         this.providedRegion = providedRegion;
     }
 
