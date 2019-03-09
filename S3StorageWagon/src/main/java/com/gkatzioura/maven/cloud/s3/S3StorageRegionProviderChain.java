@@ -31,7 +31,8 @@ public class S3StorageRegionProviderChain extends AwsRegionProviderChain {
      */
     public S3StorageRegionProviderChain(final String providedRegion) {
         super(new AwsRegionProvider[]{
-                new AwsDefaultEnvRegionProvider(),
+                //new MavenSettingsRegionProvider(providedRegion),
+                //new AwsDefaultEnvRegionProvider(),
                 new AwsEnvVarOverrideRegionProvider(),
                 new AwsSystemPropertyRegionProvider(),
                 new AwsProfileRegionProvider(),
@@ -47,6 +48,7 @@ public class S3StorageRegionProviderChain extends AwsRegionProviderChain {
      */
     @Override
     public String getRegion() throws SdkClientException {
+        //return super.getRegion();
         if (providedRegion == null) {
             // Per comments in AwsRegionProviderChain, throwing an exception is a bug.
             // Null should be returned if not found.
@@ -58,24 +60,6 @@ public class S3StorageRegionProviderChain extends AwsRegionProviderChain {
         } else {
             return providedRegion;
         }
-    }
-
-    /**
-     * Get the provided region. The provided region overrides any futher region resolution.
-     *
-     * @return Provided region
-     */
-    public String getProvidedRegion() {
-        return providedRegion;
-    }
-
-    /**
-     * Set the provided region. The provided region overrides any futher region resolution.
-     *
-     * @param providedRegion Provided region
-     */
-    public void setProvidedRegion(String providedRegion) {
-        this.providedRegion = providedRegion;
     }
 
 }

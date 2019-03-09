@@ -21,15 +21,6 @@ public class S3StorageRegionProviderChainTest {
     @Test
     public void testProvidedRegionConstructor() {
         final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain(PROVIDED_REGION);
-        Assert.assertEquals(PROVIDED_REGION, regionProvider.getProvidedRegion());
-        Assert.assertEquals(PROVIDED_REGION, regionProvider.getRegion());
-    }
-
-    @Test
-    public void testProvidedRegionSetter() {
-        final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain();
-        regionProvider.setProvidedRegion(PROVIDED_REGION);
-        Assert.assertEquals(PROVIDED_REGION, regionProvider.getProvidedRegion());
         Assert.assertEquals(PROVIDED_REGION, regionProvider.getRegion());
     }
 
