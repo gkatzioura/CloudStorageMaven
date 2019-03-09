@@ -31,35 +31,13 @@ public class S3StorageRegionProviderChain extends AwsRegionProviderChain {
      */
     public S3StorageRegionProviderChain(final String providedRegion) {
         super(new AwsRegionProvider[]{
-                //new MavenSettingsRegionProvider(providedRegion),
+                new MavenSettingsRegionProvider(providedRegion),
                 //new AwsDefaultEnvRegionProvider(),
                 new AwsEnvVarOverrideRegionProvider(),
                 new AwsSystemPropertyRegionProvider(),
                 new AwsProfileRegionProvider(),
                 new InstanceMetadataRegionProvider()});
         this.providedRegion = providedRegion;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return Region or null if not found
-     * @throws SdkClientException Will not be thrown
-     */
-    @Override
-    public String getRegion() throws SdkClientException {
-        //return super.getRegion();
-        if (providedRegion == null) {
-            // Per comments in AwsRegionProviderChain, throwing an exception is a bug.
-            // Null should be returned if not found.
-            try {
-                return super.getRegion();
-            } catch (SdkClientException e) {
-                return null;
-            }
-        } else {
-            return providedRegion;
-        }
     }
 
 }
