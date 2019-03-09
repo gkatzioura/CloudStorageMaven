@@ -10,6 +10,6 @@ public class AwsDefaultEnvRegionProvider extends AwsRegionProvider {
 
     @Override
     public String getRegion() throws SdkClientException {
-        return "AWS_DEFAULT_REGION";
+        return System.getenv("AWS_REGION");
     }
 }

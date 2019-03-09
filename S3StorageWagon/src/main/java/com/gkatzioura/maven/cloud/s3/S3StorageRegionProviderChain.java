@@ -32,7 +32,7 @@ public class S3StorageRegionProviderChain extends AwsRegionProviderChain {
     public S3StorageRegionProviderChain(final String providedRegion) {
         super(new AwsRegionProvider[]{
                 new MavenSettingsRegionProvider(providedRegion),
-                //new AwsDefaultEnvRegionProvider(),
+                new AwsDefaultEnvRegionProvider(),
                 new AwsEnvVarOverrideRegionProvider(),
                 new AwsSystemPropertyRegionProvider(),
                 new AwsProfileRegionProvider(),
