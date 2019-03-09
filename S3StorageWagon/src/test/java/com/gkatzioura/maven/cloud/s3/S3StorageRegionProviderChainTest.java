@@ -35,6 +35,16 @@ public class S3StorageRegionProviderChainTest {
     }
 
     @Test
+    @PrepareForTest(AwsDefaultEnvRegionProvider.class)
+    public void testDefaultEnvVarRegion() {
+        mockStatic(System.class);
+        when(System.getenv("AWS_DEFAULT_REGION")).thenReturn(ENV_VAR_REGION);
+
+        final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain();
+        Assert.assertEquals(ENV_VAR_REGION, regionProvider.getRegion());
+    }
+
+    @Test
     public void testSystemPropertyRegion() {
         System.setProperty(AWS_REGION_SYSTEM_PROPERTY, SYSTEM_PROPERTY_REGION);
 
