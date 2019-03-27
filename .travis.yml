@@ -1,0 +1,10 @@
+language: java
+
+services:
+  - docker
+
+before_install:
+- docker pull maven
+
+script:
+- mvn clean install
