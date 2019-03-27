@@ -7,4 +7,4 @@ before_install:
 - docker pull maven
 
 script:
-- mvn clean install -Dgpg.skip
+- mvn clean install -Dgpg.skip=true
