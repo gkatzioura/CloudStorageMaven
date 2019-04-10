@@ -151,7 +151,6 @@ public class ABSDownloadMojo extends AbstractMojo {
     }
 
     private final boolean isDirectory(CloudBlobContainer container, String key) {
-
         try {
             return container.getDirectoryReference(key).listBlobs().iterator().hasNext();
         } catch (StorageException |URISyntaxException e) {

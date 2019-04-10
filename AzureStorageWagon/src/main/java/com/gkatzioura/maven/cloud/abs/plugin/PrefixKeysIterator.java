@@ -11,7 +11,7 @@ public class PrefixKeysIterator implements Iterator<ListBlobItem> {
     private final CloudBlobContainer cloudBlobContainer;
     private final String prefix;
 
-    private Iterator<ListBlobItem> tempListing = null;
+    private final Iterator<ListBlobItem> tempListing;
 
     public PrefixKeysIterator(final CloudBlobContainer cloudBlobContainer, final String prefix) {
         this.cloudBlobContainer = cloudBlobContainer;
