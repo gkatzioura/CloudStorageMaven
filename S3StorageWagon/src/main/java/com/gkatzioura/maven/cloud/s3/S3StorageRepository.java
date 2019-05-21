@@ -152,7 +152,7 @@ public class S3StorageRepository {
 
         try {
             try(InputStream inputStream = new TransferProgressFileInputStream(file,transferProgress)) {
-                PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,key,inputStream,new ObjectMetadata());
+                PutObjectRequest putObjectRequest = new PutObjectRequest(bucket,key,inputStream,createContentLengthMetadata(file));
                 applyPublicRead(putObjectRequest);
                 amazonS3.putObject(putObjectRequest);
             }
@@ -160,6 +160,12 @@ public class S3StorageRepository {
             LOGGER.log(Level.SEVERE,"Could not transfer file ",e);
             throw new TransferFailedException("Could not transfer file "+file.getName());
         }
+    }
+
+    private ObjectMetadata createContentLengthMetadata(File file) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.length());
+        return metadata;
     }
 
     public boolean newResourceAvailable(String resourceName,long timeStamp) throws ResourceDoesNotExistException {
