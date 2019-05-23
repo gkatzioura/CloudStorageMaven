@@ -3,6 +3,7 @@ package com.gkatzioura.maven.cloud.gcs.plugin.download;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,8 @@ public class GCSDownloadMojo extends AbstractMojo {
     @Parameter(property = "gcs-download.downloadPath")
     private String downloadPath;
 
+    private Storage storage = StorageOptions.getDefaultInstance().getService();
+
     private static final Logger LOGGER = Logger.getLogger(GCSDownloadMojo.class.getName());
 
     public GCSDownloadMojo() {
@@ -44,8 +47,6 @@ public class GCSDownloadMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-
         if (keys.size()==1) {
             downloadSingleFile(storage,keys.get(0));
             return;
@@ -59,6 +60,7 @@ public class GCSDownloadMojo extends AbstractMojo {
 
         while (keyIteratorConcated.hasNext()) {
             Blob blob = keyIteratorConcated.next();
+            LOGGER.info("Scheduling blob for download "+blob.getBucket()+" "+blob.getName());
             downloadFile(blob);
         }
     }
@@ -75,7 +77,7 @@ public class GCSDownloadMojo extends AbstractMojo {
     }
 
     private void downloadFile(Blob blob) {
-
+        LOGGER.log(Level.INFO, "Downloading from bucket " + blob.getBucket() + " with key " + blob.getName());
         File file = new File(createFullFilePath(blob.getName()));
 
         if(file.getParent()!=null) {
@@ -83,8 +85,14 @@ public class GCSDownloadMojo extends AbstractMojo {
         }
 
         if(isDirectory(blob)) {
+            LOGGER.log(Level.INFO,"Bucket "+blob.getBucket()+" key "+blob.getName()+" is as directory");
             return;
         }
+
+        LOGGER.info("Downloading file "+blob.getBucket()+" key "+blob.getName()+" to path "+file.toPath());
+
+
+        LOGGER.info("Path file "+file.isDirectory()+" "+file.isFile());
 
         blob.downloadTo(file.toPath());
     }
@@ -95,7 +103,21 @@ public class GCSDownloadMojo extends AbstractMojo {
         return fullPath;
     }
 
+    /**
+     * Due to blob.isDirectory is not working as expected will have to check if there are more than two files
+     * @param blob
+     * @return
+     */
     private final boolean isDirectory(Blob blob) {
+        Iterator<Blob> blobs = storage.list(bucket,
+                                            Storage.BlobListOption.prefix(blob.getName()
+                                            )).getValues().iterator();
+
+        if(blobs.hasNext()) {
+            blobs.next();
+            return blobs.hasNext();
+        }
+
         return false;
     }
 
