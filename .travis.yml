@@ -11,5 +11,5 @@ jobs:
   include:
   - stage: deploy
     if: branch =~ ^[0-9]+.[0-9]+$
-    script: mvn release:clean; mvn --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH
+    script: mvn release:clean; mvn -X --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH
       -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare
