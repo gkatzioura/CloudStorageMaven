@@ -1,13 +1,14 @@
 language: java
 
-
 before_install:
-- docker pull maven
+  - docker pull maven
+  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
 install: mvn clean install -Dgpg.skip=true
 
 jobs:
   include:
-    - stage: deploy
-      if: branch =~ ^[0-9]+.[0-9]+$
-      script: mvn release:clean; mvn --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare
+  - stage: deploy
+    if: branch =~ ^[0-9]+.[0-9]+$
+    script: mvn release:clean; mvn --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH
+      -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare
