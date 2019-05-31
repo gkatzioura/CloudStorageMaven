@@ -3,17 +3,15 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_5284b2b67d61_key -iv $encrypted_5284b2b67d61_iv
   -in signingkey.asc.enc -out signingkey.asc -d
 - docker pull maven
-- export GPG_TTY=$(tty)
-- echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import --no-tty --batch
-  --yes
-- echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 install: mvn clean install -DskipTests=true -Dgpg.skip
-jobs:
-  include:
-  - stage: deploy
-    if: branch =~ ^[0-9]+.[0-9]+$
-    script: mvn release:clean; mvn -X --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH
-      -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare
+
+after_success:
+- gpg2 --keyring=$TRAVIS_BUILD_DIR/pubring.gpg --no-default-keyring --import signingkey.asc
+- gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring
+  --import signingkey.asc
+- mvn clean deploy --settings settings.xml -Dgpg.executable=gpg2 -Dgpg.keyname=5F84CD1775351968CABF0B0D779D2423E1D24D89
+  -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
+
 env:
   global:
   - secure: ja1tJOdRUiDY5K35e3pxQ8LVv0YRCYNJnU4MLoLIbY5qFPLAKrOf8LJYdBN8lWmBZPwPhKrhaDMMU2gQtd/pHD8aWAnaw72E4d0rHzyZ57javYRC0b9JEHkXTKKAfUL8EDL80d6e97VIBelD/gfdM5xix58gcdQANsJyms93tHUhljmv7uDUtr/io+lYAV/vTZb9XgdLmUwc9TErcWCmueoDuaYAHAY92ej6QYy38y3cqaQpYFDklLMOrzsFY2ne17fuHRNcuMG4v5iTEahTFps3eXvQ0SCq6jNkTtxdu9f1M7FnXLbReedYMInOI/O+buXAOutr2GdDdUWcjBvczZKjUQkxlpZlseFLNhv5zUFaNF0UuipX/EIQQr0sEO9kga1c4AKhQbUErtCCuMhvGQkmLjTkltfA0QOFV7ZfZ42wCQ1dNHP0guH6jDbEZndFwCUO8uDbuEglor501pQ7lD1mVks92P96/XpS8WDkHXu+XW2Zwfx56u/F4+0QigjX5EJ9mu0cfzr3eRluv101Z2zLIY+E//IInpc6lmbTsi6BM490cxWGsa7AnKRdzmM+0r++EfsSxHMB2YUATUZ50+WkmVEAWjI87xyHlKNl6y5q9pOxmU9GHUa4xJyyEvlOA05z1TS9EVMN0aXOZBf/m7zIV3GtLbN57F8J2hDTxSE=
