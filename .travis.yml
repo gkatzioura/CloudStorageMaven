@@ -9,8 +9,12 @@ after_success:
 - gpg2 --keyring=$TRAVIS_BUILD_DIR/pubring.gpg --no-default-keyring --import signingkey.asc
 - gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring
   --import signingkey.asc
-- mvn clean deploy --settings settings.xml -Dgpg.executable=gpg2 -Dgpg.keyname=$GPG_KEYNAME
-  -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
+
+jobs:
+  include:
+  - stage: deploy
+    if: branch =~ ^[0-9]+.[0-9]+$
+    script: mvn release:clean; mvn --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare --settings settings.xml -Dgpg.executable=gpg2 -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
 
 env:
   global:
