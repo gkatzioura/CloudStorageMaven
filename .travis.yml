@@ -1,15 +1,21 @@
 language: java
-
 before_install:
-  - docker pull maven
-  - export GPG_TTY=$(tty)
-  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import --no-tty --batch --yes
-  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
-
+- openssl aes-256-cbc -K $encrypted_5284b2b67d61_key -iv $encrypted_5284b2b67d61_iv
+  -in signingkey.asc.enc -out signingkey.asc -d
+- docker pull maven
+- export GPG_TTY=$(tty)
+- echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import --no-tty --batch
+  --yes
+- echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 install: mvn clean install -DskipTests=true -Dgpg.skip
-
 jobs:
   include:
   - stage: deploy
     if: branch =~ ^[0-9]+.[0-9]+$
-    script: mvn release:clean; mvn -X --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare
+    script: mvn release:clean; mvn -X --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH
+      -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare
+env:
+  global:
+  - secure: ja1tJOdRUiDY5K35e3pxQ8LVv0YRCYNJnU4MLoLIbY5qFPLAKrOf8LJYdBN8lWmBZPwPhKrhaDMMU2gQtd/pHD8aWAnaw72E4d0rHzyZ57javYRC0b9JEHkXTKKAfUL8EDL80d6e97VIBelD/gfdM5xix58gcdQANsJyms93tHUhljmv7uDUtr/io+lYAV/vTZb9XgdLmUwc9TErcWCmueoDuaYAHAY92ej6QYy38y3cqaQpYFDklLMOrzsFY2ne17fuHRNcuMG4v5iTEahTFps3eXvQ0SCq6jNkTtxdu9f1M7FnXLbReedYMInOI/O+buXAOutr2GdDdUWcjBvczZKjUQkxlpZlseFLNhv5zUFaNF0UuipX/EIQQr0sEO9kga1c4AKhQbUErtCCuMhvGQkmLjTkltfA0QOFV7ZfZ42wCQ1dNHP0guH6jDbEZndFwCUO8uDbuEglor501pQ7lD1mVks92P96/XpS8WDkHXu+XW2Zwfx56u/F4+0QigjX5EJ9mu0cfzr3eRluv101Z2zLIY+E//IInpc6lmbTsi6BM490cxWGsa7AnKRdzmM+0r++EfsSxHMB2YUATUZ50+WkmVEAWjI87xyHlKNl6y5q9pOxmU9GHUa4xJyyEvlOA05z1TS9EVMN0aXOZBf/m7zIV3GtLbN57F8J2hDTxSE=
+  - secure: BHUJpzaLB5G1XbBY0sRWv7cr+W5XD7tgiDspekYqEU4NjrEcr9jbeIqbljv3OgaCv7hQdJzlpXroUi/lbdFCDHxNuvyPFlu/NXYdr1dJTiFtqj8EtV8vrq7H4jZ1jcWdMXtDjuooilRERJJI16t2guxkyhJUb7ZZbEc+ulzj+A4QnrdbrxGyl2BxljadNdupeP22IKLApArsRBGYHj8EsdAlzL5KADIoZcvS0recfm91+My2DvdW5xC+Jpmtx3qBQkhaIqTIA8+1c3fdBiTjYZ85cmu4+RRPXPimBcR8Al+blSaEr0/btakOBmIAgpJyukfrzKunapTkFWrhZFki3g3B+ezYU+ic9dlkwmtaqLQNUs14mpEjBasIdl5o/asi6kSOcvbwXuLfd5PLjQyy6KCESBpNxChmSiAPLgyc/Sqnhb9XJYnC1t2NKMYc3390LkOcQFO5nRIXUgl1QMlHYJTqA4vL5Db6FFckM2Zql2Mpzl/2RWNSD0GHCjzuYJtA5XaZd2Cj820H71PR24ye9XAcEG/5W+iW08Bq5AMr4iyrIL5mFMS2S/k9Z1RgF0G7hZwPbsSlU9w+McagUX2h6RdfJ1vJbASu72u+vw989RJqMSjjaHaOuXwtdU5yfhZaRBDEJPqSIWtLc4voVZy3vsq/cPWw0bRriQ/zb6KYuNk=
+  - secure: TuZbDBWofDb3jXjyLRuaAFY1FobKG6xXngD1IOdmAIDIc6o5t6iRskktbQ3s3BPrPw2Rl3VOv9ZC7p/KZfsUbmlxyjxJhyoXwJBkxDdNR1wVzHBbWrUAlumWgAfH2hEVL3Q1wQmeaAPhE5WA+XU4FdrrwBjaEEvLKdGfdr/zz5t8DzPwM+g8aeHc/0Uw0PSznRYc0nMvY5nwIJpHHWxH88kktWWYB5CG42dX+YvVbeiYXi80oxYtgiIn9LmaJFa7wj8C9aDlAuIaa3M+0KCj3AU2xX7UTi1qEWufQGZ0YcQFV3I7MznQxTVN2Q9e9+eIxPW9yM6fz0DEuFGExsP+3PMjlf6109nFcyKEfQppXOPkytYurX6gFjBtA01A3y5D5VaW4rYahwTFsGpJvh1bgXn7y/UlTwJo6sp9qh+l11lHs5XMDRBMh49E23Jzq1Wds6tV8HV9t/iZM4mMBFqsH7OgDQiWV9SzOb++UamYRTUzjJZtQJzNxdbSVeO3yjtjTwZewVUH6HHGNLBUWd3UJ/99AmvL9ysOUhkIYl1yITdyIo7Ff/N0xVzcBbP0OQJdrrjb8k6Hu0C1Rp6inWa46d0MHL9adJaOHFnNPfcBPFl0VJ4FmWxFR5MRUFl/3J1b4JJNG5pL8IT9BozsEj3XqdyamTfdc+qTBt/vPw9hzJs=
