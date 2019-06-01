@@ -6,7 +6,7 @@ install: mvn clean install -DskipTests=true -Dgpg.skip
 
 deploy:
   provider: script
-  script: mvn clean deploy --settings .maven.xml -DskipTests=true -B -U
+  script: mvn clean deploy --settings settings.xml -DskipTests=true -B -U
   on:
     all_branches: true
     condition: ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} =~ ^[0-9]+.[0-9]+$
