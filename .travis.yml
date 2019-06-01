@@ -1,5 +1,9 @@
 language: java
+before_install:
+  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 install: mvn clean install -DskipTests=true -Dgpg.skip
+
 deploy:
   provider: script
   script: mvn release:clean; mvn --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare --settings settings.xml -Dgpg.executable=gpg2 -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
