@@ -6,7 +6,7 @@ before_install:
 install: mvn clean install -DskipTests=true -Dgpg.skip
 before_deploy:
 - gpg2 --keyring=$TRAVIS_BUILD_DIR/pubring.gpg --no-default-keyring --import signingkey.asc
-- gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring --import signingkey.asc
+- gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring --import signingkey.asc || echo true
 deploy:
   script: mvn release:clean; mvn --batch-mode -Dtag=$TRAVIS_BRANCH -DreleaseVersion=$TRAVIS_BRANCH -DdevelopmentVersion=2.2-SNAPSHOT -DdryRun=true release:prepare --settings settings.xml -Dgpg.executable=gpg2 -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
   on:
