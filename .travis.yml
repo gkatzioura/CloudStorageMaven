@@ -4,7 +4,7 @@ before_install:
   -in signingkey.asc.enc -out signingkey.asc -d
 - docker pull maven
 install: mvn clean install -DskipTests=true -Dgpg.skip
-after_success:
+before_deploy:
 - gpg2 --keyring=$TRAVIS_BUILD_DIR/pubring.gpg --no-default-keyring --import signingkey.asc
 - gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring --import signingkey.asc
 
