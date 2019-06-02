@@ -6,7 +6,7 @@ install: mvn clean install -DskipTests=true -Dgpg.skip
 
 deploy:
   provider: script
-  script: mvn clean deploy --settings settings.xml -Dgpg.executable=$GPG_EXECUTABLE -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
+  script: mvn clean deploy --settings settings.xml -Dgpg.executable=$GPG_EXECUTABLE -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE
   on:
     all_branches: true
     condition: ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} =~ ^[0-9]+.[0-9]+$
