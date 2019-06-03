@@ -6,7 +6,7 @@ install: mvn clean install -DskipTests=true -Dgpg.skip
 
 deploy:
   provider: script
-  script: mvn clean deploy --settings settings.xml -Dgpg.executable=$GPG_EXECUTABLE -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE
+  script: mvn release:clean; mvn --settings settings.xml --batch-mode -Dtag=2.1 -DreleaseVersion=2.1 -DdevelopmentVersion=2.1-SNAPSHOT -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE -DdryRun=true release:prepare; mvn --settings settings.xml release:perform
   on:
     all_branches: true
     condition: ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} =~ ^[0-9]+.[0-9]+$

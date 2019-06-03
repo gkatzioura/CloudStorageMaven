@@ -115,6 +115,7 @@
                     <tagNameFormat>@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <releaseProfiles>releases</releaseProfiles>
+                    <arguments>-Dgpg.keyname=${env.GPG_KEYNAME} -Dgpg.passphrase=${env.GPG_PASSPHRASE}</arguments>
                 </configuration>
             </plugin>
         </plugins>
