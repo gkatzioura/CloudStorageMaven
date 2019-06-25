@@ -18,12 +18,12 @@ package com.gkatzioura.maven.cloud.s3.plugin.upload;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gkatzioura.maven.cloud.s3.utils.ContentTypeResolver;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -76,10 +76,10 @@ public class S3UploadMojo extends AbstractMojo {
 
         AmazonS3 amazonS3 = AmazonS3ClientBuilder.defaultClient();
 
-        if(isDirectory()){
+        if (isDirectory()) {
             List<String> filesToUpload = findFilesToUpload(path);
 
-            for(String fileToUpload: filesToUpload) {
+            for (String fileToUpload: filesToUpload) {
                 keyUpload(amazonS3, generateKeyName(fileToUpload), new File(fileToUpload));
             }
         } else {
@@ -91,6 +91,7 @@ public class S3UploadMojo extends AbstractMojo {
         try (InputStream inputStream = new FileInputStream(file)) {
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(file.length());
+            objectMetadata.setContentType(ContentTypeResolver.getContentType(file));
 
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, keyName, inputStream, objectMetadata);
             amazonS3.putObject(putObjectRequest);
