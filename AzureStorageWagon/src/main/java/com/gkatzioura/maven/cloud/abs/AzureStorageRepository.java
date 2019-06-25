@@ -44,7 +44,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
-import static com.gkatzioura.maven.cloud.abs.ContentTypeResolver.getContentType;
+import static com.gkatzioura.maven.cloud.resolver.ContentTypeResolver.getContentType;
 
 public class AzureStorageRepository {
 

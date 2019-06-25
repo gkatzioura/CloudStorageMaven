@@ -1,11 +1,7 @@
-package com.gkatzioura.maven.cloud.s3.utils;
+package com.gkatzioura.maven.cloud.resolver;
 
 import java.io.File;
 
-/**
- * This class was copied directly from the azure-storage-wagon plugin's
- * com.gkatzioura.maven.cloud.abs.ContentTypeResolver.
- */
 public class ContentTypeResolver {
 
     public static String getContentType(File file) {
