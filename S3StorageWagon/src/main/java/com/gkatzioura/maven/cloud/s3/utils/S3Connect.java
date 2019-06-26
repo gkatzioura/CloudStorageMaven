@@ -32,6 +32,8 @@ public class S3Connect {
     private static final Logger LOGGER = Logger.getLogger(S3Connect.class.getName());
 
     /**
+     * Connects to the AWS API. The provided authentication, region, endpoint and path-style are all taken into account
+     * to create the returned {@link AmazonS3} instance.
      *
      * @param authenticationInfo When {@code authenticationInfo} is passed as {@code null}, an authentication provider
      *                           that gets the credentials from environment properties, system environment variables or
@@ -43,8 +45,8 @@ public class S3Connect {
      * @param pathStyle A {@link PathStyleEnabledProperty} indicating whether the endpoint/bucket configuration being
      *                  passed is in a path-style configuration. See
      *                  <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html#access-bucket-intro">Accessing a Bucket in the S3 documentation</a>.
-     * @return
-     * @throws AuthenticationException
+     * @return An instance of {@link AmazonS3} that can be used to send and receive data to the intended endpoint/bucket.
+     * @throws AuthenticationException if the passed credentials are invalid for connecting to the intended endpoint/bucket.
      */
     public static AmazonS3 connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
         AmazonS3ClientBuilder builder = null;
