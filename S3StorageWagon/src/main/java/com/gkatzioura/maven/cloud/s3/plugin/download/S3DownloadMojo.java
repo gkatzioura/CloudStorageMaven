@@ -31,13 +31,18 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.gkatzioura.maven.cloud.KeyIteratorConcated;
+import com.gkatzioura.maven.cloud.s3.EndpointProperty;
+import com.gkatzioura.maven.cloud.s3.PathStyleEnabledProperty;
 import com.gkatzioura.maven.cloud.s3.plugin.PrefixKeysIterator;
+import com.gkatzioura.maven.cloud.s3.utils.S3Connect;
 
 @Mojo(name = "s3-download")
 public class S3DownloadMojo extends AbstractMojo {
@@ -51,6 +56,9 @@ public class S3DownloadMojo extends AbstractMojo {
     @Parameter(property = "s3-download.downloadPath")
     private String downloadPath;
 
+    @Parameter(property = "s3-download.region")
+    private String region;
+
     private static final String DIRECTORY_CONTENT_TYPE = "application/x-directory";
 
     private static final Logger LOGGER = Logger.getLogger(S3DownloadMojo.class.getName());
@@ -58,15 +66,27 @@ public class S3DownloadMojo extends AbstractMojo {
     public S3DownloadMojo() {
     }
 
-    public S3DownloadMojo(String bucket, List<String> keys, String downloadPath) {
+    public S3DownloadMojo(String bucket, List<String> keys, String downloadPath, String region) {
         this.bucket = bucket;
         this.keys = keys;
         this.downloadPath = downloadPath;
+        this.region = region;
     }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        AmazonS3 amazonS3 = AmazonS3ClientBuilder.defaultClient();
+        AmazonS3 amazonS3;
+
+        try {
+            //Sending the authenticationInfo as null will make this use the default S3 authentication, which will only
+            //look at the environment Java properties or environment variables
+            amazonS3 = S3Connect.connect(null, region, new EndpointProperty(bucket), new PathStyleEnabledProperty(String.valueOf(S3ClientOptions.DEFAULT_PATH_STYLE_ACCESS)));
+        } catch (AuthenticationException e) {
+            throw new MojoExecutionException(
+                    String.format("Unable to authenticate to S3 with the available credentials. Make sure to either define the environment variables or System properties defined in https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html.%n" +
+                            "Detail: %s", e.getMessage()),
+                    e);
+        }
 
         if (keys.size()==1) {
             downloadSingleFile(amazonS3,keys.get(0));
