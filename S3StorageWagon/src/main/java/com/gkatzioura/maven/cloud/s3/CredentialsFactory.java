@@ -27,7 +27,7 @@ public class CredentialsFactory {
 
     /**
      * Creates an {@link AWSCredentialsProvider} from the passed {@link AuthenticationInfo}. This should contain the
-     * username and password used to authenticate when connecting to AWS .<br/>
+     * username and password used to authenticate when connecting to AWS .<p>
      * When {@code authenticationInfo} is passed as {@code null}, a {@link DefaultAWSCredentialsProviderChain} will be
      * used. This is an authentication provider that gets the credentials from Java environment properties, system
      * environment variables or other global locations. See the {@link DefaultAWSCredentialsProviderChain} documentation
