@@ -1,22 +1,17 @@
 package com.gkatzioura.maven.cloud.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonConstants;
+import com.gkatzioura.maven.cloud.s3.utils.S3Connect;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Iterator;
-import java.util.List;
 
 /***
  * this class will launch 14 unit test from the apache wagon provider tester
@@ -60,8 +55,8 @@ public class S3StorageWagonTest extends WagonTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         //creates the bucket
-        AmazonS3ClientBuilder amazonS3ClientBuilder = S3StorageRepository.createAmazonS3ClientBuilder(getAuthInfo(), null, new EndpointProperty(null), new PathStyleEnabledProperty(null));
-        amazonS3 = amazonS3ClientBuilder.build();
+        amazonS3 = S3Connect.connect(getAuthInfo(), null, new EndpointProperty(null), new PathStyleEnabledProperty(null));
+
         createBucket();
     }
 

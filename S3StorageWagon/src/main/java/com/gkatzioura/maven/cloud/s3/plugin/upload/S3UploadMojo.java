@@ -18,7 +18,6 @@ package com.gkatzioura.maven.cloud.s3.plugin.upload;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,11 +28,16 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+
+import com.gkatzioura.maven.cloud.s3.EndpointProperty;
+import com.gkatzioura.maven.cloud.s3.PathStyleEnabledProperty;
+import com.gkatzioura.maven.cloud.s3.utils.S3Connect;
 
 @Mojo(name = "s3-upload")
 public class S3UploadMojo extends AbstractMojo {
@@ -47,6 +51,9 @@ public class S3UploadMojo extends AbstractMojo {
     @Parameter(property = "s3-upload.key")
     private String key;
 
+    @Parameter(property = "s3-upload.region")
+    private String region;
+
     public S3UploadMojo() {
     }
 
@@ -56,11 +63,13 @@ public class S3UploadMojo extends AbstractMojo {
      * @param bucket
      * @param path
      * @param key
+     * @param region
      */
-    public S3UploadMojo(String bucket, String path, String key) {
+    public S3UploadMojo(String bucket, String path, String key, String region) {
         this.bucket = bucket;
         this.path = path;
         this.key = key;
+        this.region = region;
     }
 
     /**
@@ -70,11 +79,21 @@ public class S3UploadMojo extends AbstractMojo {
      */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if(bucket == null) {
-            throw new MojoExecutionException("You need to specify a bucket");
+        if (bucket == null) {
+            throw new MojoExecutionException("You need to specify a bucket for the s3-upload goal configuration");
         }
 
-        AmazonS3 amazonS3 = AmazonS3ClientBuilder.defaultClient();
+        AmazonS3 amazonS3;
+        try {
+            //Sending the authenticationInfo as null will make this use the default S3 authentication, which will only
+            //look at the environment Java properties or environment variables
+            amazonS3 = S3Connect.connect(null, region, new EndpointProperty(bucket), new PathStyleEnabledProperty(String.valueOf(S3ClientOptions.DEFAULT_PATH_STYLE_ACCESS)));
+        } catch (AuthenticationException e) {
+            throw new MojoExecutionException(
+                    String.format("Unable to authenticate to S3 with the available credentials. Make sure to either define the environment variables or System properties defined in https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html.%n" +
+                            "Detail: %s", e.getMessage()),
+                    e);
+        }
 
         if(isDirectory()){
             List<String> filesToUpload = findFilesToUpload(path);

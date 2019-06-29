@@ -25,16 +25,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.client.builder.AwsClientBuilder;
+import com.gkatzioura.maven.cloud.s3.utils.S3Connect;
 import org.apache.commons.io.IOUtils;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
@@ -85,42 +83,7 @@ public class S3StorageRepository {
 
 
     public void connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
-        AmazonS3ClientBuilder builder = null;
-        try {
-            builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle);
-
-            amazonS3 = builder.build();
-
-            LOGGER.log(Level.FINER,String.format("Connected to s3 using bucket %s with base directory %s",bucket,baseDirectory));
-
-        } catch (SdkClientException e) {
-            if (builder != null){
-                StringBuilder message = new StringBuilder();
-                message.append("Failed to connect");
-                if (builder.getEndpoint() != null){
-                    message.append(" to endpoint ["+ builder.getEndpoint().getServiceEndpoint()+"]");
-                    message.append(" using region [" + builder.getEndpoint().getSigningRegion() + "]");
-                }else {
-                    message.append(" using region [" + builder.getRegion() + "]");
-                }
-                throw new AuthenticationException(message.toString(), e);
-            }
-            throw new AuthenticationException("Could not authenticate",e);
-        }
-    }
-
-    public static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) {
-        final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain(region);
-        AmazonS3ClientBuilder builder;
-        builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo));
-        builder.setRegion(regionProvider.getRegion());
-
-        if (endpoint.get() != null){
-            builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), builder.getRegion()));
-        }
-
-        builder.setPathStyleAccessEnabled(pathStyle.get());
-        return builder;
+        this.amazonS3 = S3Connect.connect(authenticationInfo, region, endpoint, pathStyle);
     }
 
     public void copy(String resourceName, File destination, TransferProgress transferProgress) throws TransferFailedException, ResourceDoesNotExistException {
