@@ -16,6 +16,8 @@
 
 package com.gkatzioura.maven.cloud.s3;
 
+import java.util.logging.Logger;
+
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -24,6 +26,8 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
 public class CredentialsFactory {
+
+    private static final Logger LOGGER = Logger.getLogger(CredentialsFactory.class.getName());
 
     /**
      * Creates an {@link AWSCredentialsProvider} from the passed {@link AuthenticationInfo}. This should contain the
@@ -41,6 +45,7 @@ public class CredentialsFactory {
         if(authenticationInfo==null) {
             return new DefaultAWSCredentialsProviderChain();
         } else {
+            LOGGER.info("Using static credentials provider");
             return new AWSStaticCredentialsProvider(new BasicAWSCredentials(authenticationInfo.getUserName(),authenticationInfo.getPassword()));
         }
     }
