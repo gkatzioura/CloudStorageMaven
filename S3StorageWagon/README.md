@@ -49,7 +49,7 @@ PUBLIC_REPOSITORY=true mvn deploy
 
 Then you can use the artifact without any authorised access
 
-```bash
+```xml
     <repositories>
         <repository>
             <id>bucket-repo</id>
@@ -61,111 +61,133 @@ Then you can use the artifact without any authorised access
 ## Upload/download files for ci/cd purposes
 
 Apart from giving a solution to use s3 a maven repository the storage s3-storage-wagon can be used as a plugin in order to
-upload and download items from s3. 
+upload and download any items from s3.
 
-###### Upload files
+### Configuration
+Note that the configuration set for servers and repositories does not apply to this mode of operation.
+
+#### Authentication
+Authentication must be passed by the environment. See the
+<a href="https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html">AWS S3 API documentation</a>
+for a description of all locations where such configuration can be set.
+
+A simple way to configure this is to define the username and password as Properties available to the maven environment:
+```xml
+<properties>
+    <aws.accessKeyid>access_key</aws.accessKeyid>
+    <aws.secretKey>access_secret</aws.secretKey>
+</properties>
+```
+
+Alternatively, you may pick any of the other methods mentioned in the link above (e.g., defining the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables).
+
+
+### Upload files
 
 ```xml
 <build>
-        <plugins>
-            <plugin>
-                <groupId>com.gkatzioura.maven.cloud</groupId>
-                <artifactId>s3-storage-wagon</artifactId>
-                <version>1.5-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>upload-single-file</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>s3-upload</goal>
-                        </goals>
-                        <configuration>
-                            <bucket>yourbucketname</bucket>
-                            <path>/file/path/test.txt</path>
-                            <key>test.txt</key>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>upload-multiple-files</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>s3-upload</goal>
-                        </goals>
-                        <configuration>
-                            <bucket>yourbucketname</bucket>
-                            <path>/path/to/directory/with/files</path>
-                            <key>prefixforfiles</key>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>upload-single-file-no-key</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>s3-upload</goal>
-                        </goals>
-                        <configuration>
-                            <bucket>yourbucketname</bucket>
-                            <path>/file/path/test.txt</path>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+    <plugins>
+        <plugin>
+            <groupId>com.gkatzioura.maven.cloud</groupId>
+            <artifactId>s3-storage-wagon</artifactId>
+            <version>1.5-SNAPSHOT</version>
+            <executions>
+                <execution>
+                    <id>upload-single-file</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>s3-upload</goal>
+                    </goals>
+                    <configuration>
+                        <bucket>yourbucketname</bucket>
+                        <region>yourbucket-region</region>
+                        <path>/file/path/test.txt</path>
+                        <key>test.txt</key>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>upload-multiple-files</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>s3-upload</goal>
+                    </goals>
+                    <configuration>
+                        <bucket>yourbucketname</bucket>
+                        <region>yourbucket-region</region>
+                        <path>/path/to/directory/with/files</path>
+                        <key>prefixforfiles</key>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>upload-single-file-no-key</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>s3-upload</goal>
+                    </goals>
+                    <configuration>
+                        <bucket>yourbucketname</bucket>
+                        <region>yourbucket-region</region>
+                        <path>/file/path/test.txt</path>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 ```
 
-###### Download files
+### Download files
 
 ```xml
- <build>
-        <plugins>
-            <plugin>
-                <groupId>com.gkatzioura.maven.cloud</groupId>
-                <artifactId>s3-storage-wagon</artifactId>
-                <version>1.5-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>download-multiple-files-to-one-directory</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>s3-download</goal>
-                        </goals>
-                        <configuration>
-                            <bucket>yourbucketname</bucket>
-                            <downloadPath>/path/to/directory</downloadPath>
-                            <keys>file1.txt,file2.jpg</keys>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>download-files-and-files-starting-with-prefix</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>s3-download</goal>
-                        </goals>
-                        <configuration>
-                            <bucket>yourbucketname</bucket>
-                            <downloadPath>/path/to/directory</downloadPath>
-                            <keys>prefix,file1.txt,file2.txt</keys>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>download-single-file</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>s3-download</goal>
-                        </goals>
-                        <configuration>
-                            <bucket>yourbucketname</bucket>
-                            <downloadPath>/path/to/directory/file.txt</downloadPath>
-                            <keys>file-to-download.txt</keys>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
- </build>   
+<build>
+    <plugins>
+        <plugin>
+            <groupId>com.gkatzioura.maven.cloud</groupId>
+            <artifactId>s3-storage-wagon</artifactId>
+            <version>1.5-SNAPSHOT</version>
+            <executions>
+                <execution>
+                    <id>download-multiple-files-to-one-directory</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>s3-download</goal>
+                    </goals>
+                    <configuration>
+                        <bucket>yourbucketname</bucket>
+                        <downloadPath>/path/to/directory</downloadPath>
+                        <keys>file1.txt,file2.jpg</keys>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>download-files-and-files-starting-with-prefix</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>s3-download</goal>
+                    </goals>
+                    <configuration>
+                        <bucket>yourbucketname</bucket>
+                        <downloadPath>/path/to/directory</downloadPath>
+                        <keys>prefix,file1.txt,file2.txt</keys>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>download-single-file</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>s3-download</goal>
+                    </goals>
+                    <configuration>
+                        <bucket>yourbucketname</bucket>
+                        <downloadPath>/path/to/directory/file.txt</downloadPath>
+                        <keys>file-to-download.txt</keys>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 ```
 
-Full guide on upload [download](https://egkatzioura.com/2019/01/22/upload-and-download-files-to-s3-using-maven/)
+Full guide on [upload and download](https://egkatzioura.com/2019/01/22/upload-and-download-files-to-s3-using-maven/).
 
 
