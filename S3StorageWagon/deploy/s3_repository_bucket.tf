@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "cloud_storage_maven_repo" {
 }
 
 resource "aws_iam_policy" "cloud_storage_maven_repo_policy" {
-  name        = "${var.bucket_name}-policy"
+  name        = "${var.bucket_name}_policy"
   path        = "/"
   description = "Cloud Storage Maven Repository Bucket Policy"
 
@@ -35,7 +35,7 @@ EOF
 }
 
 resource "aws_iam_role" "cloud_storage_maven_role" {
-  name        = "${var.bucket_name}-role"
+  name        = "${var.bucket_name}_role"
   path        = "/"
   description = "Cloud Storage Maven Repository Bucket Role"
 
@@ -63,7 +63,7 @@ resource "aws_iam_role_policy_attachment" "cloud_storage_maven_role_attach_polic
 }
 
 resource "aws_iam_group" "cloud_storage_maven_group" {
-  name = "${var.bucket_name}-group"
+  name = "${var.bucket_name}_group"
 }
 
 resource "aws_iam_group_policy_attachment" "cloud_storage_maven_group_attach_policy" {

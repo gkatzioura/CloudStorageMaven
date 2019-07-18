@@ -1,4 +1,4 @@
-By executing this file certain resources are going to be created.
+By executing this file certain resources on aws are going to be created.
 
 A bucket in order to use as a repository
 
