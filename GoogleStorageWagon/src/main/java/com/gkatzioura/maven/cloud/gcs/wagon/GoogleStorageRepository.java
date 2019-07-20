@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.gcs;
+package com.gkatzioura.maven.cloud.gcs.wagon;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,31 +35,40 @@ import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 
 public class GoogleStorageRepository {
 
     private final String bucket;
     private final String baseDirectory;
-    private final KeyResolver keyResolver;
+    private final KeyResolver keyResolver = new KeyResolver();
+    private final StorageFactory storageFactory = new StorageFactory();
+    private final Optional<String> keyPath;
+
     private Storage storage;
 
     private static final Logger LOGGER = Logger.getLogger(GoogleStorageRepository.class.getName());
 
-    public GoogleStorageRepository(String bucket, String directory) {
-        this.keyResolver = new KeyResolver();
+    public GoogleStorageRepository(Optional<String> keyPath,String bucket, String directory) {
+        this.keyPath = keyPath;
         this.bucket = bucket;
         this.baseDirectory = directory;
     }
 
     public void connect() throws AuthenticationException {
-
         try {
-            storage = StorageOptions.getDefaultInstance().getService();
+            storage = createStorage();
             storage.list(bucket, Storage.BlobListOption.pageSize(1));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE,"Could not establish connection with google cloud",e);
             throw new AuthenticationException("Please configure you google cloud account by logging using gcloud and specify a default project");
+        }
+    }
+
+    private final Storage createStorage() throws IOException {
+        if(keyPath.isPresent()) {
+            return storageFactory.createWithKeyFile(keyPath.get());
+        } else {
+            return storageFactory.createDefault();
         }
     }
 
