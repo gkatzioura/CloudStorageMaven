@@ -2,7 +2,7 @@
 [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.9&x2=0)](http://badge.fury.io/gh/boennemann%2Fbadges)
 
 
-The CloudStorageMaven projects aims to provide an easy way to host your java artificats on the cloud without having to set up a maven repository.
+The CloudStorageMaven projects aims to provide an easy way to host your java artifacts on the cloud without having to set up a maven repository.
 
 Cloud storage options supported:
 
