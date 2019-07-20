@@ -40,11 +40,13 @@ import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
 import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
+import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
 
 public class GoogleStorageWagon extends AbstractStorageWagon {
 
     private GoogleStorageRepository googleStorageRepository;
     private Optional<String> keyPath;
+    private Boolean publicRepository;
 
     private static final Logger LOGGER = Logger.getLogger(GoogleStorageWagon.class.getName());
 
@@ -133,7 +135,7 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
 
             LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
 
-            googleStorageRepository = new GoogleStorageRepository(keyPath ,bucket, directory);
+            googleStorageRepository = new GoogleStorageRepository(keyPath ,bucket, directory, new PublicReadProperty(publicRepository));
             googleStorageRepository.connect();
             sessionListenerContainer.fireSessionLoggedIn();
             sessionListenerContainer.fireSessionOpened();
@@ -158,4 +160,13 @@ public class GoogleStorageWagon extends AbstractStorageWagon {
     public void setKeyPath(String keyPath) {
         this.keyPath = Optional.of(keyPath);
     }
+
+    public Boolean getPublicRepository() {
+        return publicRepository;
+    }
+
+    public void setPublicRepository(Boolean publicRepository) {
+        this.publicRepository = publicRepository;
+    }
+
 }

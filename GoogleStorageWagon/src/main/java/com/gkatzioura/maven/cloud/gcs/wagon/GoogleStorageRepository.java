@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -30,8 +31,10 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 
 import com.gkatzioura.maven.cloud.resolver.KeyResolver;
+import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.WriteChannel;
+import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
@@ -43,15 +46,17 @@ public class GoogleStorageRepository {
     private final KeyResolver keyResolver = new KeyResolver();
     private final StorageFactory storageFactory = new StorageFactory();
     private final Optional<String> keyPath;
+    private final PublicReadProperty publicReadProperty;
 
     private Storage storage;
 
     private static final Logger LOGGER = Logger.getLogger(GoogleStorageRepository.class.getName());
 
-    public GoogleStorageRepository(Optional<String> keyPath,String bucket, String directory) {
+    public GoogleStorageRepository(Optional<String> keyPath,String bucket, String directory, PublicReadProperty publicReadProperty) {
         this.keyPath = keyPath;
         this.bucket = bucket;
         this.baseDirectory = directory;
+        this.publicReadProperty = publicReadProperty;
     }
 
     public void connect() throws AuthenticationException {
@@ -108,7 +113,7 @@ public class GoogleStorageRepository {
 
         LOGGER.log(Level.FINER,String.format("Uploading key %s ",key));
 
-        BlobInfo blobInfo = BlobInfo.newBuilder(bucket,key).build();
+        BlobInfo blobInfo = applyPublicRead(BlobInfo.newBuilder(bucket,key)).build();
 
         try(WriteChannel writeChannel = storage.writer(blobInfo)) {
 
@@ -118,6 +123,17 @@ public class GoogleStorageRepository {
             while ((read = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 writeChannel.write(ByteBuffer.wrap(buffer,0, read));
             }
+        }
+    }
+
+    private BlobInfo.Builder applyPublicRead(BlobInfo.Builder builder) {
+        if(publicReadProperty.get()) {
+            Acl acl = Acl.newBuilder(Acl.User.ofAllUsers(), Acl.Role.READER).build();
+            LOGGER.info("Public read was set to true");
+            return builder.setAcl(Collections.singletonList(acl));
+
+        } else {
+            return builder;
         }
     }
 

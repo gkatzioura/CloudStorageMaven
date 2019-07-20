@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.gkatzioura.maven.cloud.s3;
+package com.gkatzioura.maven.cloud.wagon;
 
 public class PublicReadProperty {
 

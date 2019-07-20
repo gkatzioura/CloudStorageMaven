@@ -44,6 +44,7 @@ import com.gkatzioura.maven.cloud.resolver.KeyResolver;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileInputStream;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressFileOutputStream;
+import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
 
 public class S3StorageRepository {
 

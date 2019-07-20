@@ -17,9 +17,6 @@
 package com.gkatzioura.maven.cloud.s3;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -46,12 +43,12 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.gkatzioura.maven.cloud.transfer.TransferProgress;
 import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
 import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
+import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
 
 public class S3StorageWagon extends AbstractStorageWagon {
 
     private S3StorageRepository s3StorageRepository;
     private final KeyResolver keyResolver = new KeyResolver();
-
 
     private String region;
     private Boolean publicRepository;
