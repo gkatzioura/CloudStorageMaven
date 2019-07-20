@@ -17,7 +17,9 @@
 package com.gkatzioura.maven.cloud.gcs;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,6 +30,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 
 import com.gkatzioura.maven.cloud.resolver.KeyResolver;
 import com.google.api.gax.paging.Page;
+import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
@@ -90,16 +93,22 @@ public class GoogleStorageRepository {
         return updated>timeStamp;
     }
 
-    public void put(InputStream inputStream,String destination) {
-
+    public void put(InputStream inputStream,String destination) throws IOException {
         String key = resolveKey(destination);
 
         LOGGER.log(Level.FINER,String.format("Uploading key %s ",key));
 
         BlobInfo blobInfo = BlobInfo.newBuilder(bucket,key).build();
 
-        Blob createdBlob = storage.create(blobInfo,inputStream);
-        LOGGER.info(String.format("Blob created at %d",createdBlob.getCreateTime()));
+        try(WriteChannel writeChannel = storage.writer(blobInfo)) {
+
+            byte[] buffer = new byte[1024];
+            int read;
+
+            while ((read = inputStream.read(buffer, 0, buffer.length)) != -1) {
+                writeChannel.write(ByteBuffer.wrap(buffer,0, read));
+            }
+        }
     }
 
     public List<String> list(String path) {
