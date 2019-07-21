@@ -14,6 +14,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import com.gkatzioura.maven.cloud.gcs.StorageFactory;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
@@ -29,6 +30,11 @@ public class GCSUploadMojo extends AbstractMojo {
 
     @Parameter(property = "gcs-upload.key")
     private String key;
+
+    @Parameter(property = "gcs-upload.keyPath")
+    private String keyPath;
+
+    private final StorageFactory storageFactory = new StorageFactory();
 
     public GCSUploadMojo() {
     }
@@ -52,7 +58,7 @@ public class GCSUploadMojo extends AbstractMojo {
             throw new MojoExecutionException("You need to specify a bucket");
         }
 
-        Storage storage = StorageOptions.getDefaultInstance().getService();
+        Storage storage = initializeStorage();
 
         if(isDirectory()){
             List<String> filesToUpload = findFilesToUpload(path);
@@ -62,6 +68,18 @@ public class GCSUploadMojo extends AbstractMojo {
             }
         } else {
             keyUpload(storage, keyIfNull(), new File(path));
+        }
+    }
+
+    private Storage initializeStorage() throws MojoExecutionException {
+        if(keyPath==null) {
+            return storageFactory.createDefault();
+        } else {
+            try {
+                return storageFactory.createWithKeyFile(keyPath);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Failed to set Authentication to Google Cloud");
+            }
         }
     }
 

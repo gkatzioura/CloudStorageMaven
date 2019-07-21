@@ -1,6 +1,7 @@
 package com.gkatzioura.maven.cloud.gcs.plugin.download;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -14,11 +15,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import com.gkatzioura.maven.cloud.KeyIteratorConcated;
+import com.gkatzioura.maven.cloud.gcs.StorageFactory;
 import com.gkatzioura.maven.cloud.gcs.plugin.PrefixKeysIterator;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 
 @Mojo(name = "gcs-download")
 public class GCSDownloadMojo extends AbstractMojo {
@@ -32,7 +33,11 @@ public class GCSDownloadMojo extends AbstractMojo {
     @Parameter(property = "gcs-download.downloadPath")
     private String downloadPath;
 
-    private Storage storage = StorageOptions.getDefaultInstance().getService();
+    @Parameter(property = "gcs-download.keyPath")
+    private String keyPath;
+
+    private final StorageFactory storageFactory = new StorageFactory();
+    private Storage storage;
 
     private static final Logger LOGGER = Logger.getLogger(GCSDownloadMojo.class.getName());
 
@@ -47,6 +52,8 @@ public class GCSDownloadMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        storage = initializeStorage();
+
         if (keys.size()==1) {
             downloadSingleFile(storage,keys.get(0));
             return;
@@ -62,6 +69,18 @@ public class GCSDownloadMojo extends AbstractMojo {
             Blob blob = keyIteratorConcated.next();
             LOGGER.info("Scheduling blob for download "+blob.getBucket()+" "+blob.getName());
             downloadFile(blob);
+        }
+    }
+
+    private Storage initializeStorage() throws MojoExecutionException {
+        if(keyPath==null) {
+            return storageFactory.createDefault();
+        } else {
+            try {
+                return storageFactory.createWithKeyFile(keyPath);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Failed to set Authentication to Google Cloud");
+            }
         }
     }
 

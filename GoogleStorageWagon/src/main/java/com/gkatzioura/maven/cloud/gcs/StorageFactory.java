@@ -1,4 +1,4 @@
-package com.gkatzioura.maven.cloud.gcs.wagon;
+package com.gkatzioura.maven.cloud.gcs;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,11 +11,11 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-class StorageFactory {
+public class StorageFactory {
 
     private static final Logger LOGGER = Logger.getLogger(StorageFactory.class.getName());
 
-    Storage createWithKeyFile(String keyPath) throws IOException {
+    public Storage createWithKeyFile(String keyPath) throws IOException {
         File credentialsPath = new File(keyPath);
         try(FileInputStream serviceAccountStream = new FileInputStream(credentialsPath)) {
             GoogleCredentials googleCredentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
@@ -26,7 +26,7 @@ class StorageFactory {
         }
     }
 
-    Storage createDefault() {
+    public Storage createDefault() {
         return StorageOptions.getDefaultInstance().getService();
     }
 }
