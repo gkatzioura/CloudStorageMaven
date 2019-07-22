@@ -37,3 +37,17 @@ resource "azurerm_storage_account" "cloud_storage_maven_storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
+
+resource "azurerm_storage_container" "cloud_storage_maven_storage_account_snapshot_container" {
+  name                  = "snapshot"
+  resource_group_name   = "${var.resource_group_name}"
+  storage_account_name  = "${azurerm_storage_account.cloud_storage_maven_storage_account.name}"
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "cloud_storage_maven_storage_account_release_container" {
+  name                  = "release"
+  resource_group_name   = "${var.resource_group_name}"
+  storage_account_name  = "${azurerm_storage_account.cloud_storage_maven_storage_account.name}"
+  container_access_type = "private"
+}
