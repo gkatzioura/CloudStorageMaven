@@ -33,7 +33,14 @@ public class ConnectionStringFactory {
             throw new AuthenticationException("Please provide storage account credentials");
         }
 
-        return String.format(CONNECTION_STRING_TEMPLATE,authenticationInfo.getUserName(),authenticationInfo.getPassword());
+        String username = authenticationInfo.getUserName();
+        String password = authenticationInfo.getPassword();
+
+        if (username == null || username.isEmpty()) {
+            return password;
+        } else {
+            return String.format(CONNECTION_STRING_TEMPLATE, username, password);
+        }
     }
 
     /**
