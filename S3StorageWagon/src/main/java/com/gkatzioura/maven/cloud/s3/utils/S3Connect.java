@@ -82,10 +82,11 @@ public class S3Connect {
 
         AmazonS3ClientBuilder builder;
         builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo));
-        builder.setRegion(regionProvider.getRegion());
 
-        if (endpoint.get() != null){
+        if (endpoint.isPresent()){
             builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), builder.getRegion()));
+        } else {
+            builder.setRegion(regionProvider.getRegion());
         }
 
         builder.setPathStyleAccessEnabled(pathStyle.get());

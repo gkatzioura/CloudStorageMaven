@@ -31,6 +31,14 @@ public class EndpointProperty {
         this.endpoint = endpoint;
     }
 
+    public static final EndpointProperty empty() {
+        return new EndpointProperty(null);
+    }
+
+    public boolean isPresent() {
+        return endpoint != null || System.getProperty(S3_ENDPOINT)!=null;
+    }
+
     /**
      * @return the endpoint set in the constructor or set using the S3_ENDPOINT system property or null
      * */
