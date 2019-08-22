@@ -46,7 +46,7 @@ public class GoogleStorageRepository {
     private final String baseDirectory;
     private final KeyResolver keyResolver = new KeyResolver();
     private final StorageFactory storageFactory = new StorageFactory();
-    private final Optional<String> keyPath = Optional.empty();
+    private final Optional<String> keyPath;
     private final PublicReadProperty publicReadProperty;
 
     private Storage storage;
