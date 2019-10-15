@@ -46,7 +46,7 @@ To specify a repo as public you can do it through the settings.xml
   <password>access_secret</password>
   <configuration>
     <region>eu-west-1</region>
-    <publicRepository>true</publicRepository>
+    <publicRepository>true</publicRepository>    
   </configuration>
 </server>
 ``` 
@@ -73,6 +73,19 @@ Then you can use the artifact without any authorised access
         </repository>
     </repositories>
 ```
+
+### Private repos - access by profile
+You can assign aws_profile for your server. You can do it through the settings.xml: 
+```xml
+<server>
+  <id>bucket-repo</id>  
+  <configuration>
+    <region>eu-west-1</region>
+    <awsProfile>aws_profile_name</awsProfile>    
+  </configuration>
+</server>
+``` 
+
 
 ## Upload/download files for ci/cd purposes
 
