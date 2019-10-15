@@ -16,14 +16,14 @@
 
 package com.gkatzioura.maven.cloud.s3;
 
-import java.util.logging.Logger;
-
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
-
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+
+import java.util.logging.Logger;
 
 public class CredentialsFactory {
 
@@ -38,15 +38,18 @@ public class CredentialsFactory {
      * for details.
      *
      * @param authenticationInfo an {@link AuthenticationInfo} containing the AWS credentials to use
+     * @param awsProfile
      * @return a newly-built {@link AWSCredentialsProvider} with the credentials associated to the passed
-     *         {@code authenticationInfo}
+     * {@code authenticationInfo}
      */
-    public AWSCredentialsProvider create(AuthenticationInfo authenticationInfo) {
-        if(authenticationInfo==null) {
+    public AWSCredentialsProvider create(AuthenticationInfo authenticationInfo, String awsProfile) {
+        if (awsProfile != null) {
+            return new ProfileCredentialsProvider(awsProfile);
+        } else if (authenticationInfo == null) {
             return new DefaultAWSCredentialsProviderChain();
         } else {
             LOGGER.info("Using static credentials provider");
-            return new AWSStaticCredentialsProvider(new BasicAWSCredentials(authenticationInfo.getUserName(),authenticationInfo.getPassword()));
+            return new AWSStaticCredentialsProvider(new BasicAWSCredentials(authenticationInfo.getUserName(), authenticationInfo.getPassword()));
         }
     }
 }

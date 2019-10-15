@@ -34,7 +34,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -46,6 +45,9 @@ import com.gkatzioura.maven.cloud.s3.utils.S3Connect;
 
 @Mojo(name = "s3-download")
 public class S3DownloadMojo extends AbstractMojo {
+
+    @Parameter( property = "s3-download.awsProfile")
+    private String awsProfile;
 
     @Parameter( property = "s3-download.bucket")
     private String bucket;
@@ -66,11 +68,12 @@ public class S3DownloadMojo extends AbstractMojo {
     public S3DownloadMojo() {
     }
 
-    public S3DownloadMojo(String bucket, List<String> keys, String downloadPath, String region) {
+    public S3DownloadMojo(String bucket, List<String> keys, String downloadPath, String region, String awsProfile) {
         this.bucket = bucket;
         this.keys = keys;
         this.downloadPath = downloadPath;
         this.region = region;
+        this.awsProfile = awsProfile;
     }
 
     @Override
@@ -80,7 +83,7 @@ public class S3DownloadMojo extends AbstractMojo {
         try {
             //Sending the authenticationInfo as null will make this use the default S3 authentication, which will only
             //look at the environment Java properties or environment variables
-            amazonS3 = S3Connect.connect(null, region, EndpointProperty.empty(), new PathStyleEnabledProperty(String.valueOf(S3ClientOptions.DEFAULT_PATH_STYLE_ACCESS)));
+            amazonS3 = S3Connect.connect(null, region, EndpointProperty.empty(), new PathStyleEnabledProperty(String.valueOf(S3ClientOptions.DEFAULT_PATH_STYLE_ACCESS)), awsProfile);
         } catch (AuthenticationException e) {
             throw new MojoExecutionException(
                     String.format("Unable to authenticate to S3 with the available credentials. Make sure to either define the environment variables or System properties defined in https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html.%n" +

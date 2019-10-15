@@ -17,6 +17,22 @@ The S3StorageWagon project enables you to upload your artifacts to a google clou
 ```
 Full guide on [wagon](https://egkatzioura.com/2018/04/09/host-your-maven-artifacts-using-amazon-s3/)
 
+## Additional server configuration
+In your settings xml you can setup server region, credentials and awsProfile.
+```xml
+<servers>
+    <server>
+      <id>bucket-repo</id>
+      <configuration>
+        <region>eu-west-1</region>
+        <awsProfile>profile-to-your-aws</awsProfile>
+      </configuration>
+    </server>
+  </servers>
+
+
+```
+
 ### Public repos
 
 You can specify your artifacts to be public and thus getting downloaded without the need for authorised access to your bucket.

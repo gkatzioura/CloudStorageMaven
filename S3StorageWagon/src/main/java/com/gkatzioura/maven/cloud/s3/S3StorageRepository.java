@@ -83,8 +83,8 @@ public class S3StorageRepository {
     }
 
 
-    public void connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
-        this.amazonS3 = S3Connect.connect(authenticationInfo, region, endpoint, pathStyle);
+    public void connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle, String awsProfile) throws AuthenticationException {
+        this.amazonS3 = S3Connect.connect(authenticationInfo, region, endpoint, pathStyle, awsProfile);
     }
 
     public void copy(String resourceName, File destination, TransferProgress transferProgress) throws TransferFailedException, ResourceDoesNotExistException {

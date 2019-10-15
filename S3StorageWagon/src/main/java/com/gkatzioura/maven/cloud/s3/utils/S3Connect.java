@@ -45,13 +45,14 @@ public class S3Connect {
      * @param pathStyle A {@link PathStyleEnabledProperty} indicating whether the endpoint/bucket configuration being
      *                  passed is in a path-style configuration. See
      *                  <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html#access-bucket-intro">Accessing a Bucket in the S3 documentation</a>.
+     * @param awsProfile
      * @return An instance of {@link AmazonS3} that can be used to send and receive data to the intended endpoint/bucket.
      * @throws AuthenticationException if the passed credentials are invalid for connecting to the intended endpoint/bucket.
      */
-    public static AmazonS3 connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) throws AuthenticationException {
+    public static AmazonS3 connect(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle, String awsProfile) throws AuthenticationException {
         AmazonS3ClientBuilder builder = null;
         try {
-            builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle);
+            builder = createAmazonS3ClientBuilder(authenticationInfo, region, endpoint, pathStyle, awsProfile);
 
             AmazonS3 amazonS3 = builder.build();
 
@@ -77,11 +78,11 @@ public class S3Connect {
         }
     }
 
-    private static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle) {
+    private static AmazonS3ClientBuilder createAmazonS3ClientBuilder(AuthenticationInfo authenticationInfo, String region, EndpointProperty endpoint, PathStyleEnabledProperty pathStyle, String awsProfile) {
         final S3StorageRegionProviderChain regionProvider = new S3StorageRegionProviderChain(region);
 
         AmazonS3ClientBuilder builder;
-        builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo));
+        builder = AmazonS3ClientBuilder.standard().withCredentials(new CredentialsFactory().create(authenticationInfo, awsProfile));
 
         if (endpoint.isPresent()){
             builder.setEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration(endpoint.get(), builder.getRegion()));
