@@ -1,6 +1,6 @@
 # AzureStorageWagon
 
-The AzureStorageWagon project enables you to upload your artifacts to a google cloud storage bucket. 
+The AzureStorageWagon project enables you to upload your artifacts to an Azure Blob storage account. 
 
 ```
 <build>
