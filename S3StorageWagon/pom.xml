@@ -12,7 +12,7 @@
     <description>S3 storage wagon</description>
 
     <properties>
-        <aws.version>1.11.595</aws.version>
+        <aws.version>1.11.743</aws.version>
         <httpcore>4.4.10</httpcore>
         <powermock.version>1.7.1</powermock.version>
     </properties>
