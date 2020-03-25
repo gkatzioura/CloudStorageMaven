@@ -16,16 +16,12 @@
 
 package com.gkatzioura.maven.cloud.s3;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.gkatzioura.maven.cloud.resolver.KeyResolver;
+import com.gkatzioura.maven.cloud.transfer.TransferProgress;
+import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
+import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
+import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.PathUtils;
@@ -39,11 +35,14 @@ import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.gkatzioura.maven.cloud.transfer.TransferProgress;
-import com.gkatzioura.maven.cloud.transfer.TransferProgressImpl;
-import com.gkatzioura.maven.cloud.wagon.AbstractStorageWagon;
-import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
+import java.io.File;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class S3StorageWagon extends AbstractStorageWagon {
 
@@ -51,6 +50,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
     private final KeyResolver keyResolver = new KeyResolver();
 
     private String region;
+    private String awsProfile;
     private Boolean publicRepository;
 
     private static final Logger LOGGER = Logger.getLogger(S3StorageWagon.class.getName());
@@ -181,7 +181,7 @@ public class S3StorageWagon extends AbstractStorageWagon {
 
         LOGGER.log(Level.FINER,String.format("Opening connection for bucket %s and directory %s",bucket,directory));
         s3StorageRepository = new S3StorageRepository(bucket, directory, new PublicReadProperty(publicRepository));
-        s3StorageRepository.connect(authenticationInfo, region, new EndpointProperty(endpoint), new PathStyleEnabledProperty(pathStyleEnabled));
+        s3StorageRepository.connect(authenticationInfo, region, new EndpointProperty(endpoint), new PathStyleEnabledProperty(pathStyleEnabled), awsProfile);
 
         sessionListenerContainer.fireSessionLoggedIn();
         sessionListenerContainer.fireSessionOpened();
@@ -227,4 +227,11 @@ public class S3StorageWagon extends AbstractStorageWagon {
         this.pathStyleEnabled = pathStyleEnabled;
     }
 
+    public void setAwsProfile(String awsProfile) {
+        this.awsProfile = awsProfile;
+    }
+
+    public String getAwsProfile() {
+        return awsProfile;
+    }
 }
