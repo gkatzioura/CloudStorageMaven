@@ -17,9 +17,6 @@
 package com.gkatzioura.maven.cloud.s3.plugin.upload;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +28,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
@@ -95,10 +91,10 @@ public class S3UploadMojo extends AbstractMojo {
                     e);
         }
 
-        if(isDirectory()){
+        if (isDirectory()) {
             List<String> filesToUpload = findFilesToUpload(path);
 
-            for(String fileToUpload: filesToUpload) {
+            for (String fileToUpload: filesToUpload) {
                 keyUpload(amazonS3, generateKeyName(fileToUpload), new File(fileToUpload));
             }
         } else {
@@ -106,16 +102,18 @@ public class S3UploadMojo extends AbstractMojo {
         }
     }
 
-    private void keyUpload(AmazonS3 amazonS3, String keyName, File file) throws MojoExecutionException {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(file.length());
-
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, keyName, inputStream, objectMetadata);
-            amazonS3.putObject(putObjectRequest);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Failed to upload mojo",e);
-        }
+    /**
+     * Uploads the given file to the path given by {@code keyName} on the configured {@link #bucket}. Note that the
+     * content-length and content-type of the uploaded file will be inferred by the AWS SDK's implementation.
+     *
+     * @param amazonS3 the API object to use for the upload
+     * @param keyName  the path in the bucket where the given file will be stored at
+     * @param file     the file to upload
+     * @see AmazonS3#putObject(String, String, File)
+     */
+    private void keyUpload(AmazonS3 amazonS3, String keyName, File file) {
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, keyName, file);
+        amazonS3.putObject(putObjectRequest);
     }
 
     private List<String> findFilesToUpload(String filePath) {

@@ -2,7 +2,6 @@ package com.gkatzioura.maven.cloud.abs.plugin.upload;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -22,7 +21,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
-import static com.gkatzioura.maven.cloud.abs.ContentTypeResolver.getContentType;
+import static com.gkatzioura.maven.cloud.resolver.ContentTypeResolver.getContentType;
 
 @Mojo(name = "abs-upload")
 public class ABSUploadMojo extends AbstractMojo {

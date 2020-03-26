@@ -1,4 +1,4 @@
-package com.gkatzioura.maven.cloud.abs;
+package com.gkatzioura.maven.cloud.resolver;
 
 import java.io.File;
 
