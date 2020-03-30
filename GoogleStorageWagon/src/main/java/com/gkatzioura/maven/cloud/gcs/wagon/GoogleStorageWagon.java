@@ -45,7 +45,7 @@ import com.gkatzioura.maven.cloud.wagon.PublicReadProperty;
 public class GoogleStorageWagon extends AbstractStorageWagon {
 
     private GoogleStorageRepository googleStorageRepository;
-    private Optional<String> keyPath;
+    private Optional<String> keyPath = Optional.empty();
     private Boolean publicRepository;
 
     private static final Logger LOGGER = Logger.getLogger(GoogleStorageWagon.class.getName());
