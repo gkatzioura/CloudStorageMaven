@@ -1,4 +1,5 @@
 language: java
+jdk: openjdk8
 
 services:
   - docker
@@ -7,4 +8,7 @@ before_install:
 - docker pull maven
 
 script:
-- mvn clean install -Dgpg.skip=true
+# As noted at https://docs.travis-ci.com/user/languages/java/#projects-using-maven
+# Travis always runs mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+# The following line runs if that succeeds
+- mvn clean install
